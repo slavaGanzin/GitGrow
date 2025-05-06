@@ -1,4 +1,3 @@
-# main.py
 import os
 import sys
 import sqlite3
@@ -6,21 +5,22 @@ import random
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
+
 from github import Github, GithubException
 
 # --- CONFIGURATION ---
-USERNAME_FILE       = os.getenv("USERNAME_FILE", "usernames.txt")
-NUM_TARGETS         = int(os.getenv("NUM_TARGETS", 10))
-FOLLOWERS_PER_TARGET= int(os.getenv("FOLLOWERS_PER_TARGET", 50))
-WAIT_DAYS           = int(os.getenv("WAIT_DAYS", 7))
+USERNAME_FILE        = os.getenv("USERNAME_FILE", "usernames.txt")
+NUM_TARGETS          = int(os.getenv("NUM_TARGETS", 10))
+FOLLOWERS_PER_TARGET = int(os.getenv("FOLLOWERS_PER_TARGET", 50))
+WAIT_DAYS            = int(os.getenv("WAIT_DAYS", 7))
 
 # --- DIRECTORIES & PATHS ---
-BASE_DIR        = Path(__file__).parent
-DB_DIR          = BASE_DIR / "db"
-DB_PATH         = DB_DIR / "bot_data.db"
-LOG_DIR_FOLLOW  = BASE_DIR / "logs" / "follow"
-LOG_DIR_STARS   = BASE_DIR / "logs" / "stars"
-USERNAME_PATH   = BASE_DIR / USERNAME_FILE
+BASE_DIR       = Path(__file__).parent
+DB_DIR         = BASE_DIR / "db"
+DB_PATH        = DB_DIR / "bot_data.db"
+LOG_DIR_FOLLOW = BASE_DIR / "logs" / "follow"
+LOG_DIR_STARS  = BASE_DIR / "logs" / "stars"
+USERNAME_PATH  = BASE_DIR / USERNAME_FILE
 
 for d in (DB_DIR, LOG_DIR_FOLLOW, LOG_DIR_STARS):
     d.mkdir(parents=True, exist_ok=True)
@@ -41,7 +41,7 @@ token = os.getenv("GITHUB_TOKEN")
 if not token:
     sys.exit("GITHUB_TOKEN environment variable is required")
 gh = Github(token)
-me = gh.get_user()
+me = gh.get_user()  # auth user, but we no longer call me.follow()
 
 # --- TIMESTAMP & ATTEMPT ID ---
 now = datetime.utcnow()
@@ -115,8 +115,10 @@ for target in targets:
             continue
 
         other = safe_api(gh.get_user, login)
-        if other and safe_api(me.follow, other):
+        # ← instead of me.follow(other) do:
+        if other and safe_api(other.follow):
             follow_log.info(f"Followed {login}")
+
             repos = pick_random_repos(other, 1)
             orig = None
             if repos and safe_api(me.add_to_starred, repos[0]):
@@ -125,6 +127,7 @@ for target in targets:
                 orig = repo.name
                 c.execute("INSERT OR IGNORE INTO stars VALUES (?,?,?,?,?)",
                           (login, repo.name, "starred", now, attempt_id))
+
             c.execute("INSERT OR IGNORE INTO follows VALUES (?,?,?,?,?)",
                       (login, now, "pending", orig, attempt_id))
             conn.commit()
@@ -143,12 +146,14 @@ for username, orig_repo in pending:
         continue
 
     if username not in current_followers:
-        if safe_api(me.unfollow, user):
+        # ← instead of me.unfollow(user) do:
+        if safe_api(user.unfollow):
             follow_log.info(f"Unfollowed {username} (no follow-back)")
             c.execute("UPDATE follows SET status='unfollowed' WHERE username=?", (username,))
     else:
         c.execute("UPDATE follows SET status='followed-back' WHERE username=?", (username,))
         starred = {s.full_name for s in safe_api(user.get_starred) or []}
+
         if not (my_repos & starred):
             for r in pick_random_repos(user, 2):
                 if safe_api(me.add_to_starred, r):
@@ -161,6 +166,7 @@ for username, orig_repo in pending:
                     star_log.info(f"Starred {username}/{r.name}")
                     c.execute("INSERT OR IGNORE INTO stars VALUES (?,?,?,?,?)",
                               (username, r.name, "starred", now, attempt_id))
+
         if orig_repo and f"{username}/{orig_repo}" not in starred:
             repo = safe_api(gh.get_repo, f"{username}/{orig_repo}")
             if repo and safe_api(me.remove_from_starred, repo):

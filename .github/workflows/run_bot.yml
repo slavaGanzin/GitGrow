@@ -1,3 +1,4 @@
+# .github/workflows/run_bot.yml
 name: GitHub Bot Runner (3×/day, 8 h apart)
 
 on:
@@ -25,8 +26,9 @@ jobs:
       - name: Run follow/star bot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TARGET_USERNAMES: "octocat,defunkt"   # your comma-separated list
-          FOLLOW_BATCH_SIZE: 25
-          WAIT_DAYS: 7
+          USERNAME_FILE: "usernames.txt"
+          NUM_TARGETS: "10"
+          FOLLOWERS_PER_TARGET: "50"
+          WAIT_DAYS: "7"
         run: |
           python main.py

@@ -21,8 +21,6 @@ def main():
             candidates = [l.strip() for l in f if l.strip()]
     except FileNotFoundError:
         sys.exit(f"Username file not found: {username_file}")
-    if not candidates:
-        sys.exit("No usernames found in file")
 
     try:
         with open(whitelist_file) as f:
@@ -30,7 +28,7 @@ def main():
     except FileNotFoundError:
         whitelist = set()
 
-    # — STEP 1: Fetch current follow lists & unfollow non-reciprocals —
+    # — STEP 1: Unfollow non-reciprocals —
     try:
         followers_set = {u.login.lower() for u in me.get_followers()}
         following_map = {u.login.lower(): u for u in me.get_following()}
@@ -39,11 +37,7 @@ def main():
 
     unfollowed = 0
     for login, user in list(following_map.items()):
-        if (
-            login not in followers_set    # they don’t follow you back
-            and login not in whitelist     # not whitelisted
-            and login != me.login.lower()  # not yourself
-        ):
+        if login not in followers_set and login not in whitelist and login != me.login.lower():
             try:
                 me.remove_from_following(user)
                 unfollowed += 1
@@ -52,38 +46,43 @@ def main():
                 print(f"[ERROR] could not unfollow {user.login}: {e}")
     print(f"Done unfollow phase: {unfollowed}")
 
-    # — STEP 2: Refresh your live following list —
+    # — STEP 2: Refresh your following list —
     try:
         following_map = {u.login.lower(): u for u in me.get_following()}
     except GithubException as e:
         sys.exit(f"[ERROR] refreshing following list: {e}")
 
-    # — STEP 3: Randomly pick up to per_run new users to follow —
+    # — STEP 3: SAMPLE up to per_run EXISTING users to follow —
     random.shuffle(candidates)
     to_follow = []
     for login in candidates:
         if len(to_follow) >= per_run:
             break
+
         ll = login.lower()
-        # ← check here against refreshed following_map
+        # skip self, already following, whitelist
         if ll == me.login.lower() or ll in following_map or ll in whitelist:
             continue
-        to_follow.append(login)
 
-    # — STEP 4: Follow the sampled users —
-    followed = 0
-    for login in to_follow:
+        # existence check
         try:
             user = gh.get_user(login)
         except GithubException:
             print(f"[SKIP] {login} not found")
             continue
+
+        to_follow.append(user)  # store the actual NamedUser
+    print(f"Sampling complete: will follow {len(to_follow)}/{per_run} users.")
+
+    # — STEP 4: FOLLOW the sampled users —
+    followed = 0
+    for user in to_follow:
         try:
             me.add_to_following(user)
             followed += 1
-            print(f"[FOLLOWED] {login} ({followed}/{per_run})")
+            print(f"[FOLLOWED] {user.login}")
         except GithubException as e:
-            print(f"[ERROR] could not follow {login}: {e}")
+            print(f"[ERROR] could not follow {user.login}: {e}")
     print(f"Done follow phase: {followed}/{per_run}")
 
 if __name__ == "__main__":

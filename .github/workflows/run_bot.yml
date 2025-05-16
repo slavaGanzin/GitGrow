@@ -23,6 +23,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           USERNAME_FILE: "usernames.txt"
+          WHITELIST_FILE: "whitelist.txt"
           FOLLOWERS_PER_RUN: "10"
-          WHITELIST: "ikramagix"
         run: python main.py
+

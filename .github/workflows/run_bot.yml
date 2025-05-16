@@ -1,10 +1,10 @@
 # .github/workflows/run_bot.yml
-name: GitHub Bot Runner (3×/day, 8 h apart)
+name: GitHub Bot Runner (daily)
 
 on:
   schedule:
-    # at 00:00, 08:00 and 16:00 UTC every day
-    - cron: '0 0,8,16 * * *'
+    # every day at 00:00 UTC (once per 24 h)
+    - cron: '0 0 * * *'
   workflow_dispatch: {}
 
 jobs:
@@ -23,12 +23,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run follow/star bot
+      - name: Run follow bot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME_FILE: "usernames.txt"
-          NUM_TARGETS: "10"
-          FOLLOWERS_PER_TARGET: "50"
-          WAIT_DAYS: "7"
-        run: |
-          python main.py
+          # pick one target (you’ll get up to 20 follows from its followers)
+          NUM_TARGETS: "1"
+          FOLLOWERS_PER_TARGET: "20"
+        run: python main.py

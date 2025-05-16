@@ -3,8 +3,7 @@ name: GitHub Bot Runner (daily)
 
 on:
   schedule:
-    # every day at 00:00 UTC (once per 24 h)
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * *'     # daily at 00:00 UTC
   workflow_dispatch: {}
 
 jobs:
@@ -21,13 +20,12 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install PyGithub
 
       - name: Run follow bot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME_FILE: "usernames.txt"
-          # pick one target (you’ll get up to 20 follows from its followers)
           NUM_TARGETS: "1"
           FOLLOWERS_PER_TARGET: "20"
         run: python main.py

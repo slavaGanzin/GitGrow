@@ -1,13 +1,17 @@
+# .github/workflows/run_bot.yml
 name: BotOla Follow Runner
 
+# Only run when manually triggered
 on:
   workflow_dispatch: {}
 
 jobs:
   follow:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Check out code
+        uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -21,9 +25,9 @@ jobs:
 
       - name: Run follow bot
         env:
+          # your PAT_TOKEN must live here
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           USERNAME_FILE: "usernames.txt"
           WHITELIST_FILE: "whitelist.txt"
           FOLLOWERS_PER_RUN: "10"
         run: python main.py
-

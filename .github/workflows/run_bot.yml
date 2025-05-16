@@ -1,4 +1,3 @@
-# .github/workflows/run_bot.yml
 name: GitHub Bot Runner (daily)
 
 on:
@@ -26,6 +25,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           USERNAME_FILE: "usernames.txt"
-          NUM_TARGETS: "1"
-          FOLLOWERS_PER_TARGET: "20"
+          FOLLOWERS_PER_RUN: "50"
         run: python main.py

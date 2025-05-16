@@ -115,8 +115,8 @@ for target in targets:
             continue
 
         other = safe_api(gh.get_user, login)
-        # use authenticated user's follow method
-        if other and safe_api(me.follow, other):
+        # use authenticated user's add_to_following() to follow
+        if other and safe_api(me.add_to_following, other):
             follow_log.info(f"Followed {login}")
 
             repos = pick_random_repos(other, 1)
@@ -154,8 +154,8 @@ for username, orig_repo in pending:
         continue
 
     if username not in current_followers:
-        # use authenticated user's unfollow method
-        if safe_api(me.unfollow, user):
+        # use authenticated user's remove_from_following() to unfollow
+        if safe_api(me.remove_from_following, user):
             follow_log.info(f"Unfollowed {username} (no follow-back)")
             c.execute(
                 "UPDATE follows SET status='unfollowed' WHERE username=?",
@@ -168,7 +168,7 @@ for username, orig_repo in pending:
         )
         starred = {s.full_name for s in safe_api(user.get_starred) or []}
 
-        # star back logic
+        # star-back logic
         star_count = 2 if not (my_repos & starred) else 3
         for r in pick_random_repos(user, star_count):
             if safe_api(me.add_to_starred, r):

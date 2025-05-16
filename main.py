@@ -1,77 +1,69 @@
 import os
 import sys
-import random
 from github import Github, GithubException
 
 def main():
     token = os.getenv("GITHUB_TOKEN")
     if not token:
         sys.exit("GITHUB_TOKEN environment variable is required")
+
     gh = Github(token)
     me = gh.get_user()
 
-    # load all candidate usernames
+    # load list
     username_file = os.getenv("USERNAME_FILE", "usernames.txt")
     try:
         with open(username_file) as f:
-            candidates = [l.strip() for l in f if l.strip()]
+            candidates = [line.strip() for line in f if line.strip()]
     except FileNotFoundError:
         sys.exit(f"Username file not found: {username_file}")
     if not candidates:
         sys.exit("No usernames found in file")
 
-    # how many to follow this run
-    to_follow_target = int(os.getenv("FOLLOWERS_PER_RUN", 50))
+    # how many to follow from list per run
+    per_run = int(os.getenv("FOLLOWERS_PER_RUN", 10))
 
-    # shuffle and iterate until we hit the target
-    random.shuffle(candidates)
-    followed = 0
-
-    # fetch whom we already follow
+    # who you already follow
     try:
         already_following = {u.login for u in me.get_following()}
     except GithubException as e:
         sys.exit(f"[ERROR] fetching your following list: {e}")
 
+    # — PART 1: follow next batch from file —
+    to_follow = []
     for login in candidates:
-        if followed >= to_follow_target:
+        if len(to_follow) >= per_run:
             break
         if login == me.login or login in already_following:
-            # skip yourself or anyone you're already following
             continue
+        to_follow.append(login)
 
-        # try to resolve the user
+    for login in to_follow:
         try:
             user = gh.get_user(login)
         except GithubException:
-            # user not found or inaccessible; skip
             print(f"[SKIP] {login} not found")
             continue
 
-        # attempt to follow
         try:
             me.add_to_following(user)
-            followed += 1
-            print(f"[FOLLOWED] {login} ({followed}/{to_follow_target})")
+            print(f"[FOLLOWED] {login}")
         except GithubException as e:
             print(f"[ERROR] could not follow {login}: {e}")
 
-    print(f"Finished follow phase: followed {followed} of {to_follow_target} requested")
-
-    # — now unfollow anyone who isn't following you back —
+    # — PART 2: follow back your followers —
     try:
-        current_followers = {u.login for u in me.get_followers()}
-        current_following = list(me.get_following())
+        followers = {u.login: u for u in me.get_followers()}
     except GithubException as e:
-        sys.exit(f"[ERROR] fetching follow lists: {e}")
+        sys.exit(f"[ERROR] fetching your followers: {e}")
 
-    for u in current_following:
-        if u.login not in current_followers:
+    for login, user in followers.items():
+        if login not in already_following and login != me.login:
             try:
-                me.remove_from_following(u)
-                print(f"[UNFOLLOWED] {u.login}")
+                me.add_to_following(user)
+                print(f"[FOLLOW-BACK] {login}")
             except GithubException as e:
-                print(f"[ERROR] could not unfollow {u.login}: {e}")
+                print(f"[ERROR] could not follow back {login}: {e}")
 
 if __name__ == "__main__":
     main()

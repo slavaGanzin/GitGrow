@@ -41,7 +41,7 @@ token = os.getenv("GITHUB_TOKEN")
 if not token:
     sys.exit("GITHUB_TOKEN environment variable is required")
 gh = Github(token)
-me = gh.get_user()  # auth user, but we no longer call me.follow()
+me = gh.get_user()
 
 # --- TIMESTAMP & ATTEMPT ID ---
 now = datetime.utcnow()
@@ -115,8 +115,8 @@ for target in targets:
             continue
 
         other = safe_api(gh.get_user, login)
-        # ← instead of me.follow(other) do:
-        if other and safe_api(other.follow):
+        # use authenticated user's follow method
+        if other and safe_api(me.follow, other):
             follow_log.info(f"Followed {login}")
 
             repos = pick_random_repos(other, 1)
@@ -125,16 +125,24 @@ for target in targets:
                 repo = repos[0]
                 star_log.info(f"Starred {login}/{repo.name}")
                 orig = repo.name
-                c.execute("INSERT OR IGNORE INTO stars VALUES (?,?,?,?,?)",
-                          (login, repo.name, "starred", now, attempt_id))
+                c.execute(
+                    "INSERT OR IGNORE INTO stars VALUES (?,?,?,?,?)",
+                    (login, repo.name, "starred", now, attempt_id)
+                )
 
-            c.execute("INSERT OR IGNORE INTO follows VALUES (?,?,?,?,?)",
-                      (login, now, "pending", orig, attempt_id))
+            c.execute(
+                "INSERT OR IGNORE INTO follows VALUES (?,?,?,?,?)",
+                (login, now, "pending", orig, attempt_id)
+            )
             conn.commit()
 
 # --- STEP 2: PROCESS PENDING FOLLOW-BACKS & STAR-BACKS ---
 cutoff = now - timedelta(days=WAIT_DAYS)
-c.execute("SELECT username, original_repo_starred FROM follows WHERE followed_at<=? AND status='pending'", (cutoff,))
+c.execute(
+    "SELECT username, original_repo_starred FROM follows "
+    "WHERE followed_at<=? AND status='pending'",
+    (cutoff,)
+)
 pending = c.fetchall()
 
 current_followers = {f.login for f in safe_api(me.get_followers) or []}
@@ -146,33 +154,41 @@ for username, orig_repo in pending:
         continue
 
     if username not in current_followers:
-        # ← instead of me.unfollow(user) do:
-        if safe_api(user.unfollow):
+        # use authenticated user's unfollow method
+        if safe_api(me.unfollow, user):
             follow_log.info(f"Unfollowed {username} (no follow-back)")
-            c.execute("UPDATE follows SET status='unfollowed' WHERE username=?", (username,))
+            c.execute(
+                "UPDATE follows SET status='unfollowed' WHERE username=?",
+                (username,)
+            )
     else:
-        c.execute("UPDATE follows SET status='followed-back' WHERE username=?", (username,))
+        c.execute(
+            "UPDATE follows SET status='followed-back' WHERE username=?",
+            (username,)
+        )
         starred = {s.full_name for s in safe_api(user.get_starred) or []}
 
-        if not (my_repos & starred):
-            for r in pick_random_repos(user, 2):
-                if safe_api(me.add_to_starred, r):
-                    star_log.info(f"Starred {username}/{r.name}")
-                    c.execute("INSERT OR IGNORE INTO stars VALUES (?,?,?,?,?)",
-                              (username, r.name, "starred", now, attempt_id))
-        else:
-            for r in pick_random_repos(user, 3):
-                if safe_api(me.add_to_starred, r):
-                    star_log.info(f"Starred {username}/{r.name}")
-                    c.execute("INSERT OR IGNORE INTO stars VALUES (?,?,?,?,?)",
-                              (username, r.name, "starred", now, attempt_id))
+        # star back logic
+        star_count = 2 if not (my_repos & starred) else 3
+        for r in pick_random_repos(user, star_count):
+            if safe_api(me.add_to_starred, r):
+                star_log.info(f"Starred {username}/{r.name}")
+                c.execute(
+                    "INSERT OR IGNORE INTO stars VALUES (?,?,?,?,?)",
+                    (username, r.name, "starred", now, attempt_id)
+                )
 
+        # remove original star if they didn’t star back
         if orig_repo and f"{username}/{orig_repo}" not in starred:
             repo = safe_api(gh.get_repo, f"{username}/{orig_repo}")
             if repo and safe_api(me.remove_from_starred, repo):
-                star_log.info(f"Unstarred {username}/{orig_repo} (no star-back)")
-                c.execute("INSERT OR IGNORE INTO stars VALUES (?,?,?,?,?)",
-                          (username, orig_repo, "unstarred", now, attempt_id))
+                star_log.info(
+                    f"Unstarred {username}/{orig_repo} (no star-back)"
+                )
+                c.execute(
+                    "INSERT OR IGNORE INTO stars VALUES (?,?,?,?,?)",
+                    (username, orig_repo, "unstarred", now, attempt_id)
+                )
     conn.commit()
 
 # --- PRUNE OLD LOGS & DB ENTRIES ---

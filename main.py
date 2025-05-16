@@ -10,6 +10,13 @@ def main():
     gh = Github(token)
     me = gh.get_user()
 
+    # load whitelist
+    whitelist = set(
+        usr.strip().lower()
+        for usr in os.getenv("WHITELIST", "").split(",")
+        if usr.strip()
+    )
+
     # load list
     username_file = os.getenv("USERNAME_FILE", "usernames.txt")
     try:
@@ -22,6 +29,62 @@ def main():
 
     # how many to follow from list per run
     per_run = int(os.getenv("FOLLOWERS_PER_RUN", 10))
+
+    # — prefetch your following list —
+    try:
+        already_following = {u.login.lower() for u in me.get_following()}
+    except GithubException as e:
+        sys.exit(f"[ERROR] fetching your following list: {e}")
+
+    # PART 1: follow next batch from file
+    followed = 0
+    for login in candidates:
+        if followed >= per_run:
+            break
+        login_l = login.lower()
+        if (
+            login_l == me.login.lower()
+            or login_l in already_following
+            or login_l in whitelist
+        ):
+            continue
+
+        # resolve user
+        try:
+            user = gh.get_user(login)
+        except GithubException:
+            print(f"[SKIP] {login} not found or inaccessible")
+            continue
+
+        try:
+            me.add_to_following(user)
+            followed += 1
+            print(f"[FOLLOWED] {login} ({followed}/{per_run})")
+        except GithubException as e:
+            print(f"[ERROR] could not follow {login}: {e}")
+
+    print(f"Done follow-from-list: {followed}/{per_run}")
+
+    # PART 2: follow back your followers
+    try:
+        followers = {u.login.lower(): u for u in me.get_followers()}
+    except GithubException as e:
+        sys.exit(f"[ERROR] fetching your followers: {e}")
+
+    for login_l, user in followers.items():
+        if (
+            login_l not in already_following
+            and login_l != me.login.lower()
+            and login_l not in whitelist
+        ):
+            try:
+                me.add_to_following(user)
+                print(f"[FOLLOW-BACK] {user.login}")
+            except GithubException as e:
+                print(f"[ERROR] could not follow back {user.login}: {e}")
+
+if __name__ == "__main__":
+    main()
 
     # who you already follow
     try:

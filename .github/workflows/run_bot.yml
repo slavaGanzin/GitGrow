@@ -24,7 +24,7 @@ jobs:
 
       - name: Run follow bot
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           USERNAME_FILE: "usernames.txt"
           NUM_TARGETS: "1"
           FOLLOWERS_PER_TARGET: "20"

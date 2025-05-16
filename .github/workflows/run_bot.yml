@@ -1,6 +1,5 @@
 name: BotOla Follow Runner
 
-# run only when manually triggered
 on:
   workflow_dispatch: {}
 
@@ -25,4 +24,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           USERNAME_FILE: "usernames.txt"
           FOLLOWERS_PER_RUN: "10"
+          WHITELIST: "ikramagix"
         run: python main.py

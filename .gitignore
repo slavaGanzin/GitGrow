@@ -1,1 +1,6 @@
 whitelist_gr33kurious.txt
+whitelist.txt
+!.env.example
+.env 
+.gitignore
+logs

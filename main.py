@@ -4,7 +4,7 @@ import random
 from github import Github, GithubException
 
 def main():
-    # — Auth —
+    # — Auth & client setup —
     token = os.getenv("GITHUB_TOKEN")
     if not token:
         sys.exit("GITHUB_TOKEN environment variable is required")
@@ -12,18 +12,21 @@ def main():
     me = gh.get_user()
 
     # — Config & load files —
-    USER_FILE      = os.getenv("USERNAME_FILE", "usernames.txt")
-    WHITE_FILE     = os.getenv("WHITELIST_FILE", "whitelist.txt")
-    PER_RUN        = int(os.getenv("FOLLOWERS_PER_RUN", 10))
+    USER_FILE   = os.getenv("USERNAME_FILE", "usernames.txt")
+    WHITE_FILE  = os.getenv("WHITELIST_FILE", "whitelist.txt")
+    PER_RUN     = int(os.getenv("FOLLOWERS_PER_RUN", 10))
 
+    # load candidates
     try:
         with open(USER_FILE) as f:
-            candidates = [l.strip() for l in f if l.strip()]
+            candidates = [ln.strip() for ln in f if ln.strip()]
     except FileNotFoundError:
         sys.exit(f"Username file not found: {USER_FILE}")
+
+    # load whitelist
     try:
         with open(WHITE_FILE) as f:
-            whitelist = {l.strip().lower() for l in f if l.strip()}
+            whitelist = {ln.strip().lower() for ln in f if ln.strip()}
     except FileNotFoundError:
         whitelist = set()
 
@@ -42,19 +45,21 @@ def main():
                 print(f"[ERROR] unfollow {login}: {e}")
     print(f"Done unfollow phase: {unfollowed}")
 
-    # — STEP 2: Refresh following list —
+    # — Refresh following map after unfollowing —
     following = {u.login.lower(): u for u in me.get_following()}
 
-    # — STEP 3: Sample & follow fresh users (with existence+private checks) —
+    # — STEP 2: Follow up to PER_RUN new users, skipping private/unfound ones —
     random.shuffle(candidates)
-    to_follow = []
+    new_followed = 0
     private_new = []
+    notfound_new = []
 
     for login in candidates:
-        if len(to_follow) >= PER_RUN:
+        if new_followed >= PER_RUN:
             break
+
         ll = login.lower()
-        if ll in following or ll in whitelist or ll == me.login.lower():
+        if ll == me.login.lower() or ll in whitelist or ll in following:
             continue
 
         # existence check
@@ -62,34 +67,40 @@ def main():
             user = gh.get_user(login)
         except GithubException as e:
             if getattr(e, "status", None) == 404:
+                notfound_new.append(login)
                 print(f"[SKIP] {login} not found")
             else:
                 private_new.append(login)
                 print(f"[PRIVATE?] {login} exists but inaccessible: {e}")
             continue
 
-        to_follow.append(user)
-
-    print(f"Sampling complete: {len(to_follow)}/{PER_RUN} will be followed.")
-    for user in to_follow:
+        # attempt follow
         try:
             me.add_to_following(user)
-            print(f"[FOLLOWED] {user.login}")
+            new_followed += 1
+            print(f"[FOLLOWED] {login} ({new_followed}/{PER_RUN})")
         except GithubException as e:
-            print(f"[ERROR] follow {user.login}: {e}")
-    if private_new:
-        print("Private/inaccessible accounts when sampling:")
-        for u in private_new:
-            print(f" - {u}")
+            if getattr(e, "status", None) == 403:
+                private_new.append(login)
+                print(f"[PRIVATE] cannot follow {login}: {e}")
+            else:
+                print(f"[ERROR] follow {login}: {e}")
 
-    # — STEP 4: Follow-back your followers (detect private) —
-    # refresh followers
+    print(f"Done follow phase: {new_followed}/{PER_RUN} followed.")
+    if notfound_new:
+        print("Not found (skipped) during follow phase:", notfound_new)
+    if private_new:
+        print("Private/inaccessible (skipped) during follow phase:", private_new)
+
+    # — STEP 3: Follow-back your followers, skipping private/inaccessible ones —
+    # refresh followers map
     followers_map = {u.login.lower(): u for u in me.get_followers()}
     private_back = []
     back_count = 0
 
     for login, user in followers_map.items():
-        if login in following or login in whitelist or login == me.login.lower():
+        ll = login.lower()
+        if ll == me.login.lower() or ll in whitelist or ll in following:
             continue
         try:
             me.add_to_following(user)
@@ -102,11 +113,9 @@ def main():
             else:
                 print(f"[ERROR] follow-back {login}: {e}")
 
-    print(f"Done follow-back phase: {back_count}")
+    print(f"Done follow-back phase: {back_count} followed-back.")
     if private_back:
-        print("Private/inaccessible accounts during follow-back:")
-        for u in private_back:
-            print(f" - {u}")
+        print("Private/inaccessible skipped during follow-back:", private_back)
 
 if __name__ == "__main__":
     main()

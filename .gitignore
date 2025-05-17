@@ -1,5 +1,5 @@
+whitelist_gr33kurious.txt
 whitelist.txt
-.env
 !.env.example
 .env 
 .gitignore

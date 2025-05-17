@@ -20,7 +20,6 @@ def main():
     username_path = base_dir / "usernames.txt"
     log_dir = base_dir / "logs"
     log_dir.mkdir(exist_ok=True)
-    offline_log = log_dir / "offline_usernames.log"
 
     if not username_path.exists():
         sys.exit(f"Error: usernames file not found at {username_path}")
@@ -49,12 +48,18 @@ def main():
 
     print(f"[INFO] Existence check complete: {len(usernames)} checked, {len(missing)} missing.")
 
-    # Log missing entries to offline_usernames.log and remove them from usernames.txt
+    # Log missing entries to a timestamped file and remove them from usernames.txt
     if missing:
-        timestamp = datetime.utcnow().isoformat()
-        with offline_log.open("a") as lf:
-            for name in missing:
-                lf.write(f"{timestamp} {name}\n")
+        timestamp = datetime.utcnow().strftime("%Y%m%d%H%M")
+        offline_file = log_dir / f"offline_usernames-{timestamp}.txt"
+        try:
+            with offline_file.open("w") as lf:
+                for name in missing:
+                    lf.write(f"{name}\n")
+            print(f"[INFO] Logged {len(missing)} missing usernames to {offline_file}")
+        except Exception as e:
+            print(f"[ERROR] failed to write offline file: {e}")
+
         # Filter out missing and rewrite usernames.txt
         remaining = [u for u in usernames if u not in missing]
         try:

@@ -24,7 +24,7 @@ def main():
         with white_path.open() as f:
             whitelist = {ln.strip().lower() for ln in f if ln.strip()}
     else:
-        print(f"[WARN] config/whitelist.txt not found, proceeding with empty whitelist")
+        print(f"[WARN] config/whitelist.txt not found, proceeding with empty whitelist!")
         whitelist = set()
 
     # — Load candidate usernames —

@@ -1,6 +1,5 @@
 # GitGrowBot 
-- *Build and nurture your GitHub network with automation.*
-- *Easily follow, unfollow, star, and unstar on autopilot ✈️  so you can focus on coding while your community grows.*
+➫ *Build and nurture your GitHub network with automation. Easily follow, unfollow, star, and unstar on autopilot ✈️  so you can focus on coding while your community grows.*
 
 GitGrowBot is your personal GitHub networking assistant. It's an automation tool designed to help you **grow** and **nurture** your developer network organically. With GitGrowBot, you’ll:
 
@@ -37,7 +36,7 @@ This ensures your follow list stays active while you're busy coding.
   - `scripts/bot_core.py` for main logic.  
   - `scripts/cleaner.py` for list maintenance.  
 - **Prebuilt Workflow**  
-  - `.github/workflows/run_bot.yml` schedules runs every 3 hours (configurable).
+  - `.github/workflows/run_bot.yml` schedules runs every 1, 3, or 5 hours (configurable).
 
 ## Getting started
 

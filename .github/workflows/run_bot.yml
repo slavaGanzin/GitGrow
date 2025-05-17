@@ -3,8 +3,8 @@ name: BotOla Follow Runner
 
 on:
   schedule:
-    # every 3 hours at minute 5 UTC (05:00, 08:05, 11:05, …)
-    - cron: '5 */3 * * *'
+    # every 1 hours at minute 5 UTC (05:00, 08:05, 11:05, …)
+    - cron: '5 */1 * * *'
   workflow_dispatch: {}
 
 jobs:

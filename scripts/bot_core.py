@@ -1,6 +1,8 @@
+#!/usr/bin/env python3
 import os
 import sys
 import random
+from pathlib import Path
 from github import Github, GithubException
 
 def main():
@@ -11,24 +13,30 @@ def main():
     gh = Github(token)
     me = gh.get_user()
 
+    # — Determine base repo directory —
+    base_dir = Path(__file__).parent.parent
+
     # — Config & load files —
-    USER_FILE   = os.getenv("USERNAME_FILE", "usernames.txt")
-    WHITE_FILE  = os.getenv("WHITELIST_FILE", "whitelist.txt")
-    PER_RUN     = int(os.getenv("FOLLOWERS_PER_RUN", 10))
+    # allow overriding via env, else default to config/
+    user_file   = os.getenv("USERNAME_FILE", "config/usernames.txt")
+    white_file  = os.getenv("WHITELIST_FILE", "config/whitelist.txt")
+    per_run     = int(os.getenv("FOLLOWERS_PER_RUN", 10))
+
+    user_path  = (base_dir / user_file).resolve()
+    white_path = (base_dir / white_file).resolve()
+
+    if not user_path.exists():
+        sys.exit(f"Username file not found: {user_path}")
+    if not white_path.exists():
+        print(f"[WARN] Whitelist file not found at {white_path}, proceeding with empty whitelist.")
+        whitelist = set()
+    else:
+        with white_path.open() as f:
+            whitelist = {ln.strip().lower() for ln in f if ln.strip()}
 
     # load candidates
-    try:
-        with open(USER_FILE) as f:
-            candidates = [ln.strip() for ln in f if ln.strip()]
-    except FileNotFoundError:
-        sys.exit(f"Username file not found: {USER_FILE}")
-
-    # load whitelist
-    try:
-        with open(WHITE_FILE) as f:
-            whitelist = {ln.strip().lower() for ln in f if ln.strip()}
-    except FileNotFoundError:
-        whitelist = set()
+    with user_path.open() as f:
+        candidates = [ln.strip() for ln in f if ln.strip()]
 
     # — STEP 1: Unfollow non-reciprocals —
     followers = {u.login.lower() for u in me.get_followers()}
@@ -45,17 +53,17 @@ def main():
                 print(f"[ERROR] unfollow {login}: {e}")
     print(f"Done unfollow phase: {unfollowed}")
 
-    # — Refresh following map after unfollowing —
+    # — Refresh following list —
     following = {u.login.lower(): u for u in me.get_following()}
 
     # — STEP 2: Follow up to PER_RUN new users, skipping private/unfound ones —
     random.shuffle(candidates)
     new_followed = 0
-    private_new = []
     notfound_new = []
+    private_new = []
 
     for login in candidates:
-        if new_followed >= PER_RUN:
+        if new_followed >= per_run:
             break
 
         ll = login.lower()
@@ -78,7 +86,7 @@ def main():
         try:
             me.add_to_following(user)
             new_followed += 1
-            print(f"[FOLLOWED] {login} ({new_followed}/{PER_RUN})")
+            print(f"[FOLLOWED] {login} ({new_followed}/{per_run})")
         except GithubException as e:
             if getattr(e, "status", None) == 403:
                 private_new.append(login)
@@ -86,14 +94,13 @@ def main():
             else:
                 print(f"[ERROR] follow {login}: {e}")
 
-    print(f"Done follow phase: {new_followed}/{PER_RUN} followed.")
+    print(f"Done follow phase: {new_followed}/{per_run} followed.")
     if notfound_new:
         print("Not found (skipped) during follow phase:", notfound_new)
     if private_new:
         print("Private/inaccessible (skipped) during follow phase:", private_new)
 
     # — STEP 3: Follow-back your followers, skipping private/inaccessible ones —
-    # refresh followers map
     followers_map = {u.login.lower(): u for u in me.get_followers()}
     private_back = []
     back_count = 0

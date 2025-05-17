@@ -115,4 +115,4 @@ logs/           # CI-run artifacts (gitignored)
 ---
 
 **Happy networking & happy coding!** 🎉
-– The GitGrowBot Team
+– @ikramagix & @gr33kurious

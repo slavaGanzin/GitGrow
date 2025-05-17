@@ -1,1 +1,6 @@
 whitelist.txt
+.env
+!.env.example
+.env 
+.gitignore
+logs

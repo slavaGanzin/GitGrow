@@ -43,7 +43,7 @@ This ensures your follow list stays active while you're busy coding.
 
 1. **Fork** or **clone** this repo.
 2. In **Settings → Secrets → Actions**, add your Github PA Token as `PAT_TOKEN` (scope: `user:follow`).
-3. **5,500+ members like you who want to grow are waiting for you in** `config/usernames.txt`. You can join this list too—see [⭐ Don't miss out: Join our 5,500+ users](#dont-miss-out-join-our-5500-users) below.
+3. **5,500+ members like you who want to grow are waiting for you in** `config/usernames.txt`. You can join this list too—see **⭐ Don't miss out: Join our 5,500+ users** below.
 4. (Important) Edit `config/whitelist.txt` to protect any accounts you never want the script to act on (mostly for not unfollowing them or unstarring their repositories).
 5. (Optional) Copy `.env.example` → `.env` for local testing (or contributors).
 6. **Enable** GitHub Actions in your repo settings.

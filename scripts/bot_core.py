@@ -14,17 +14,17 @@ def main():
     me = gh.get_user()
 
     # — Determine repo root & config paths —
-    base_dir   = Path(__file__).parent.parent.resolve()
-    user_path  = base_dir / "config" / "usernames.txt"
-    white_path = base_dir / "config" / "whitelist.txt"
-    per_run    = 100
+    base_dir  = Path(__file__).parent.parent.resolve()
+    user_path = base_dir / "config" / "usernames.txt"
+    white_path= base_dir / "config" / "whitelist.txt"
+    per_run   = 100
 
     # — Load whitelist —
     if white_path.exists():
         with white_path.open() as f:
             whitelist = {ln.strip().lower() for ln in f if ln.strip()}
     else:
-        print(f"[WARN] config/whitelist.txt not found, proceeding with empty whitelist!")
+        print(f"[WARN] config/whitelist.txt not found, proceeding with empty whitelist")
         whitelist = set()
 
     # — Load candidate usernames —
@@ -33,25 +33,22 @@ def main():
     with user_path.open() as f:
         candidates = [ln.strip() for ln in f if ln.strip()]
 
-    # --- STEP 1: Unfollow non-reciprocals (difference-based) ---
-    try:
-        followers = {u.login.lower() for u in me.get_followers()}
-        following = {u.login.lower() for u in me.get_following()}
-    except GithubException as e:
-        sys.exit(f"[ERROR] fetching follow lists: {e}")
+    # --- STEP 1: Unfollow non-reciprocals ---
+    followers_map = {u.login.lower() for u in me.get_followers()}
+    following_map = {u.login.lower(): u for u in me.get_following()}
 
-    # Compute exactly who to unfollow
-    to_unfollow = (
-        following
-        - followers                                     # they don’t follow you back
-        - whitelist                                    # except whitelisted
-        - {me.login.lower()}                           # never yourself
-    )
+    to_unfollow = {
+        login for login in following_map
+        if login not in followers_map
+        and login not in whitelist
+        and login != me.login.lower()
+    }
 
     unfollowed = 0
     for login in to_unfollow:
         try:
-            me.remove_from_following(login)
+            # use the NamedUser object for remove
+            me.remove_from_following(following_map[login])
             unfollowed += 1
             print(f"[UNFOLLOWED] {login}")
         except GithubException as e:
@@ -59,25 +56,26 @@ def main():
     print(f"Done unfollow phase: {unfollowed}")
 
     # — Refresh following list after unfollowing —
-    following = {u.login.lower() for u in me.get_following()}
+    following_map = {u.login.lower(): u for u in me.get_following()}
 
     # --- STEP 2: Follow up to per_run new users ---
     random.shuffle(candidates)
     new_followed = 0
     notfound_new = []
-    private_new = []
+    private_new  = []
 
     for login in candidates:
         if new_followed >= per_run:
             break
 
         ll = login.lower()
-        if ll == me.login.lower() or ll in whitelist or ll in following:
+        # skip self, whitelist, already following
+        if ll == me.login.lower() or ll in whitelist or ll in following_map:
             continue
 
-        # existence check
+        # existence check → get NamedUser
         try:
-            gh.get_user(login)
+            user = gh.get_user(login)
         except GithubException as e:
             if getattr(e, "status", None) == 404:
                 notfound_new.append(login)
@@ -89,7 +87,7 @@ def main():
 
         # attempt follow
         try:
-            me.add_to_following(login)
+            me.add_to_following(user)
             new_followed += 1
             print(f"[FOLLOWED] {login} ({new_followed}/{per_run})")
         except GithubException as e:
@@ -105,18 +103,18 @@ def main():
     if private_new:
         print("Private/inaccessible during follow phase:", private_new)
 
-    # --- STEP 3: Follow-back current followers ---
-    try:
-        followers_now = {u.login.lower() for u in me.get_followers()}
-    except GithubException as e:
-        sys.exit(f"[ERROR] fetching followers for follow-back: {e}")
-
-    back_count = 0
+    # --- STEP 3: Follow-back your followers ---
+    followers_map = {u.login.lower(): u for u in me.get_followers()}
+    back_count   = 0
     private_back = []
 
-    for login in followers_now - following - whitelist - {me.login.lower()}:
+    for login, user in followers_map.items():
+        # skip self, whitelist, already following
+        if login in whitelist or login == me.login.lower() or login in following_map:
+            continue
+
         try:
-            me.add_to_following(login)
+            me.add_to_following(user)
             back_count += 1
             print(f"[FOLLOW-BACKED] {login}")
         except GithubException as e:
@@ -129,6 +127,7 @@ def main():
     print(f"Done follow-back phase: {back_count}")
     if private_back:
         print("Private/inaccessible during follow-back:", private_back)
+
 
 if __name__ == "__main__":
     main()

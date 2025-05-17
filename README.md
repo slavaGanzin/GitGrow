@@ -1,5 +1,5 @@
 # GitGrowBot 
-➫ *Build and nurture your GitHub network with automation. Easily follow, unfollow, star, and unstar on autopilot ✈️  so you can focus on coding while your community grows.*
+*Build and nurture your GitHub network with automation. Easily follow, unfollow, star, and unstar on autopilot ✈️ so you can focus on coding while your community grows.*
 
 GitGrowBot is your personal GitHub networking assistant. It's an automation tool designed to help you **grow** and **nurture** your developer network organically. With GitGrowBot, you’ll:
 
@@ -9,8 +9,7 @@ GitGrowBot is your personal GitHub networking assistant. It's an automation tool
 
 All actions run on a schedule (or on demand) in GitHub Actions, so you never need to manually review your follow list.
 
-## "You Only Get What You Give" ?
-
+## How it works
 The motto **“You only get what you give”** drives GitGrowBot’s behavior:
 
 1. GitGrowBot **follow** someone for you—chances are, they’ll notice and **follow you back** (especially if they’re clever like you and use GitGrowBot too!).  

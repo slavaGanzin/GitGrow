@@ -14,16 +14,12 @@ def main():
     me = gh.get_user()
 
     # — Determine base repo directory —
-    base_dir = Path(__file__).parent.parent
+    base_dir = Path(__file__).parent.parent.resolve()
 
-    # — Config & load files —
-    # allow overriding via env, else default to config/
-    user_file   = os.getenv("USERNAME_FILE", "config/usernames.txt")
-    white_file  = os.getenv("WHITELIST_FILE", "config/whitelist.txt")
-    per_run     = int(os.getenv("FOLLOWERS_PER_RUN", 10))
-
-    user_path  = (base_dir / user_file).resolve()
-    white_path = (base_dir / white_file).resolve()
+    # — Fixed config locations and run count —
+    user_path  = base_dir / "config" / "usernames.txt"
+    white_path = base_dir / "config" / "whitelist.txt"
+    per_run    = 100
 
     if not user_path.exists():
         sys.exit(f"Username file not found: {user_path}")
@@ -34,7 +30,7 @@ def main():
         with white_path.open() as f:
             whitelist = {ln.strip().lower() for ln in f if ln.strip()}
 
-    # load candidates
+    # Load candidate usernames
     with user_path.open() as f:
         candidates = [ln.strip() for ln in f if ln.strip()]
 
@@ -56,7 +52,7 @@ def main():
     # — Refresh following list —
     following = {u.login.lower(): u for u in me.get_following()}
 
-    # — STEP 2: Follow up to PER_RUN new users, skipping private/unfound ones —
+    # — STEP 2: Follow up to per_run new users —
     random.shuffle(candidates)
     new_followed = 0
     notfound_new = []
@@ -100,7 +96,7 @@ def main():
     if private_new:
         print("Private/inaccessible (skipped) during follow phase:", private_new)
 
-    # — STEP 3: Follow-back your followers, skipping private/inaccessible ones —
+    # — STEP 3: Follow-back your followers —
     followers_map = {u.login.lower(): u for u in me.get_followers()}
     private_back = []
     back_count = 0

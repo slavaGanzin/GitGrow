@@ -1,8 +1,10 @@
+# .github/workflows/run_bot.yml
 name: BotOla Follow Runner
 
 on:
   schedule:
-    - cron: '5 */3 * * *'    # every 3 hours at minute 5
+    # every 3 hours at minute 5 UTC (05:00, 08:05, 11:05, …)
+    - cron: '5 */3 * * *'
   workflow_dispatch: {}
 
 jobs:
@@ -10,7 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Check out code
+        uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -24,8 +27,10 @@ jobs:
 
       - name: Run follow bot
         env:
+          # Use PAT (with user:follow scope) stored as a secret
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-          USERNAME_FILE: "usernames.txt"
-          WHITELIST_FILE: "whitelist.example.txt"
+          # point at the files in config/
+          USERNAME_FILE: "config/usernames.txt"
+          WHITELIST_FILE: "config/whitelist.example.txt"
           FOLLOWERS_PER_RUN: "100"
         run: python scripts/bot_core.py

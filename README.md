@@ -42,12 +42,21 @@ This ensures your follow list stays active while you're busy coding.
 
 1. **Fork** or **clone** this repo.
 2. In **Settings → Secrets → Actions**, add your Github PAT as `PAT_TOKEN` (scope: `user:follow`).
-3. **5,500+ members like you who want to grow are waiting for you in** `config/usernames.txt`. You can join this list too—see below (**⭐ Don't miss out: Join our 5,500+ users**).
-4. Edit the `schedule.cron` in `run_bot.yml` to your desired interval.
-5. (Important) Edit `config/whitelist.txt` to protect any accounts you never want the script to act on (mostly for not unfollowing them or unstarring their repositories).
+3. In **Settings → Variables → Repository variables**, add **`BOT_USER`** with _your_ GitHub username. *This prevents the workflow from running in other people’s forks unless they set their own name.*
+4. **5,500 + members like you who want to grow are waiting for you in** `config/usernames.txt`.  
+You can join this list too—see below (**⭐ Don't miss out: Join our 5,500+ users**).
+4. Edit the `schedule.cron` in `run_bot.yml` to your desired interval. The default pre-set is an hourly run.
+5. (Important) Edit `config/whitelist.txt` to protect any accounts you never want the script to act on (no unfollowing, no unstarring for usernames in `whitelist.txt`).
 6. (Optional) Copy `.env.example` → `.env` for local testing (or contributors).
 7. **Enable** GitHub Actions in your repo settings.
-8. Sit back and code—GitGrowBot handles the rest!
+9. Sit back and code—**GitGrowBot** does the networking for you!  
+
+## Local testing
+
+If you want to test the bot locally, you can use the provided `scripts/cleaner.py` and `scripts/gitgrow.py` scripts.
+
+1. Copy `.env.example` → `.env` and fill in your PAT.
+2. Run the following commands:
 
 ```bash
 # Example local run of cleanup
@@ -125,6 +134,8 @@ We started building GitGrowBot as a peer-to-peer coding challenge on a sleepless
 Every contribution, big or small, helps everyone grow. Thank you for pitching in!
 
 **Happy networking & happy coding!** 
+_And thank you for saying thank you! If you find this project useful, please consider giving it a star or supporting us on **buymeacoffee** below._
+## Support
 
 <div>
 <a href="https://www.buymeacoffee.com/ikramagix" target="_blank">

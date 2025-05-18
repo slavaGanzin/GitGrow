@@ -1,3 +1,5 @@
+[![GitGrowBot Scheduled Runner (Global)](https://github.com/ikramagix/GitGrowBot/actions/workflows/run_bot.yml/badge.svg)](https://github.com/ikramagix/GitGrowBot/actions/workflows/run_bot.yml)
+
 # GitGrowBot 
 
 GitGrowBot is your personal GitHub networking assistant. It's an automation tool designed to help you **grow** and **nurture** your developer network organically. With GitGrowBot, you’ll:

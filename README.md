@@ -32,27 +32,30 @@ This ensures your follow list stays active while you're busy coding.
   - Runs hands-free in Actions.  
   - `.env` support for local testing (optional).  
 - **Modular code**  
-  - `scripts/bot_core.py` for main logic.  
+  - `scripts/gitgrow.py` for main logic.  
   - `scripts/cleaner.py` for list maintenance.  
 - **Prebuilt Workflow**  
-  - `.github/workflows/run_bot.yml` schedules runs every 1, 3, or 5 hours (configurable).
+  - `.github/workflows/run_bot.yml` scheduled runner every 1, 3, or 5 hours (configurable).
+  - `.github/workflows/manual_follow.yml` – manual trigger: **follow & follow-back only**  
+  - `.github/workflows/manual_unfollow.yml` – manual trigger: **unfollow non-reciprocals only**  
 
 ## Getting started
 
 1. **Fork** or **clone** this repo.
 2. In **Settings → Secrets → Actions**, add your Github PA Token as `PAT_TOKEN` (scope: `user:follow`).
-3. **5,500+ members like you who want to grow are waiting for you in** `config/usernames.txt`. You can join this list too—see **⭐ Don't miss out: Join our 5,500+ users** below.
-4. (Important) Edit `config/whitelist.txt` to protect any accounts you never want the script to act on (mostly for not unfollowing them or unstarring their repositories).
-5. (Optional) Copy `.env.example` → `.env` for local testing (or contributors).
-6. **Enable** GitHub Actions in your repo settings.
-7. Sit back and code—GitGrowBot handles the rest!
+3. **5,500+ members like you who want to grow are waiting for you in** `config/usernames.txt`. You can join this list too—see below (**⭐ Don't miss out: Join our 5,500+ users**).
+4. Edit the `schedule.cron` in `run_bot.yml` to your desired interval.
+5. (Important) Edit `config/whitelist.txt` to protect any accounts you never want the script to act on (mostly for not unfollowing them or unstarring their repositories).
+6. (Optional) Copy `.env.example` → `.env` for local testing (or contributors).
+7. **Enable** GitHub Actions in your repo settings.
+8. Sit back and code—GitGrowBot handles the rest!
 
 ```bash
 # Example local run of cleanup
 python scripts/cleaner.py
 
 # Example local dry-run of follow bot
-python scripts/bot_core.py
+python scripts/gitgrow.py
 ```
 
 ## ⭐ Don't miss out: Join our 5,500+ users!
@@ -70,28 +73,43 @@ Let's grow! 💪
 
 | Options      | Description                                                   | Default                                             |
 | ------------------ | ------------------------------------------------------------- | --------------------------------------------------- |
-| PAT_TOKEN       | Your PAT with `user:follow` scope, added in your secrets   | (required)                                          |
-| USERNAME_FILE      | List of usernames the script randomly samples to follow/star  | (keep it as it is) `config/usernames.txt`           |
-| WHITELIST_FILE     | List of usernames the script will always-skip/ignore          | (editable, add usernames) `config/whitelist.txt` |
-| FOLLOWERS_PER_RUN  | How many new users to follow each run                         | (keep it low to avoid rate-limit) `100`              |
+| PAT_TOKEN       | Your PAT with `user:follow` scope, added in your secrets   |(empty) **required**                                      |
+| USERNAME_FILE      | File listing target usernames (in the `config/` directory)  | `config/usernames.txt` (keep it as it is)            |
+| WHITELIST_FILE     | File listing usernames never to unfollow (in `config/`)          | `config/whitelist.txt` (editable, add usernames) |
+| FOLLOWERS_PER_RUN  | How many new users to follow each run                         | `100` (keep it low to avoid rate-limit)               |
 
 ## Repository structure
 
 ```
-├── .github/
-│   └── workflows/run_bot.yml     # Scheduled follow/unfollow workflow
-├── config/
-│   ├── usernames.txt             # 5,500+ community members
-│   └── whitelist.txt             # Accounts to always skip
-├── logs/                         # Runtime artifacts (gitignored)
+├── .gitattributes
+├── .github
+│   └── workflows
+│       ├── run_bot.yml          # Scheduled: unfollow + follow
+│       ├── manual_follow.yml    # workflow_dispatch → follow only
+│       └── manual_unfollow.yml  # workflow_dispatch → unfollow only
+├── .gitignore
+├── README.md
+├── config
+│   ├── usernames.txt            # 5,500+ community members
+│   └── whitelist.txt            # accounts to always skip
+├── logs                         # CI artifacts (gitignored)
 │   └── offline_usernames-*.txt
-├── scripts/
-│   ├── bot_core.py               # Follow/unfollow logic
-│   └── cleaner.py                # List maintenance
-├── .env.example                  # Optional local dev settings
-├── requirements.txt              # PyGithub, python-dotenv, etc.
-└── README.md
+├── requirements.txt
+└── scripts
+    ├── gitgrow.py               # Main follow/unfollow driver
+    ├── unfollowers.py           # Unfollow-only logic
+    └── cleaner.py               # Username list maintenance
 ```
+### Manual Troubleshooting Runners (optional)
+
+If you ever need to isolate one step for debugging, head to your repo’s **Actions** tab:
+
+- **GitGrowBot Manual Follow** (`.github/workflows/manual_follow.yml`)  
+  Manually triggers **only** the follow & follow-back logic.  
+- **GitGrowBot Manual Unfollow** (`.github/workflows/manual_unfollow.yml`)  
+  Manually triggers **only** the unfollow non-reciprocals logic.  
+
+Choose the workflow, click **Run workflow**, select your branch, and go!
 
 ## Contributing
 
@@ -113,5 +131,5 @@ Every contribution, big or small, helps everyone grow. Thank you for pitching in
     width="150">
 </a>
 </div>
-
-– With 💛 from [@ikramagix](https://github.com/ikramagix) & ❤️ from [@gr33kurious](https://github.com/gr33kurious)
+<br>
+– With 💛 from [@ikramagix](https://github.com/ikramagix) & [@gr33kurious](https://github.com/gr33kurious)

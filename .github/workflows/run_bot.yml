@@ -1,4 +1,14 @@
 # .github/workflows/run_bot.yml
+# name: GitGrowBot Scheduled Runner (Global)
+# #
+# # This workflow is used to run the GitGrowBot scripts on a schedule.
+# # It is triggered by a cron schedule and can also be run manually.
+# #
+# # The workflow is designed to run the unfollow bot and the follow bot.
+# # The unfollow bot is responsible for unfollowing users who do not follow back.
+# # The follow bot is responsible for following new users from our 5500+ users.
+# #
+
 name: GitGrowBot Scheduled Runner (Global)
 
 on:
@@ -13,6 +23,9 @@ on:
 
 jobs:
   follow:
+    # Run only for the configured BOT_USER (your username, from GitHub Actions secrets and variables)
+    # This is to prevent the bot from running on forks or other users' repositories.
+    if: github.actor == vars.BOT_USER || github.repository_owner == vars.BOT_USER
     runs-on: ubuntu-latest
 
     steps:

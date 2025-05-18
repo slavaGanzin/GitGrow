@@ -1,3 +1,9 @@
+# .github/workflows/manual_follow.yml
+#
+# # It is used to run the follow bot script.
+# # This is a partial workflow, and it does not include the unfollowing step.
+# # The unfollowing step is handled in a separate workflow.
+
 name: Manual Follow (Partial)
 
 on:

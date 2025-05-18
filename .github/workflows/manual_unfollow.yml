@@ -1,3 +1,9 @@
+# .github/workflows/manual_unfollow.yml
+#
+# # It is used to run the unfollow bot script.
+# # This is a partial workflow, and it does not include the following step.
+# # The following step is handled in a separate workflow.
+
 name: Manual Unfollow (Partial)
 
 on:
@@ -5,6 +11,7 @@ on:
 
 jobs:
   unfollow:
+    if: github.actor == vars.BOT_USER || github.repository_owner == vars.BOT_USER
     runs-on: ubuntu-latest
 
     steps:

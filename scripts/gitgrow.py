@@ -5,10 +5,6 @@ import random
 from pathlib import Path
 from github import Github, GithubException
 
-# ────────────────────────────────── your “thank-you” is worth a thousand bucks ───────────────────────────────
-SAY_THANK_YOU_WHITELIST = {"ikramagix", "gr33kurious"}   # <-- this set of usernames will not be unfollowed 
-# ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
-
 def main():
     # — Auth & client setup —
     token = os.getenv("GITHUB_TOKEN")  # Retrieve GitHub token from environment variables
@@ -22,9 +18,6 @@ def main():
     user_path = base_dir / "config" / "usernames.txt"  # Path to the usernames configuration file
     white_path= base_dir / "config" / "whitelist.txt"  # Path to the whitelist configuration file
     per_run   = 100  # Number of users to follow per run
-    # Never unfollow these accounts (your gratitude is worth a thousand bucks)
-    SAY_THANK_YOU_WHITELIST = {"ikramagix", "gr33kurious"}
-
 
     # — Load whitelist —
     if white_path.exists():
@@ -33,9 +26,6 @@ def main():
     else:
         print(f"[WARN] config/whitelist.txt not found, proceeding with empty whitelist")
         whitelist = set()  # Initialize empty whitelist if file is not found
-
-    # — Merge hard-coded creators without touching the file —
-    whitelist |= {u.lower() for u in SAY_THANK_YOU_WHITELIST}
 
     # — Load candidate usernames —
     if not user_path.exists():

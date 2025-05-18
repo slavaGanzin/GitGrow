@@ -1,20 +1,18 @@
-[![GitGrowBot Scheduled Runner (Global)](https://github.com/ikramagix/GitGrowBot/actions/workflows/run_bot.yml/badge.svg)](https://github.com/ikramagix/GitGrowBot/actions/workflows/run_bot.yml)
-
-# GitGrowBot
+# GitGrowBot 
 
 GitGrowBot is your personal GitHub networking assistant. It's an automation tool designed to help you **grow** and **nurture** your developer network organically. With GitGrowBot, you’ll:
 
 * **Follow** users from our curated list, up to a configurable limit per run.
-* **Unfollow** anyone who doesn’t follow you back.
+* **Unfollow** anyone who doesn’t follow you back, because **reciprocity** matters.
 * (COMING SOON) **Star** and **unstar** repositories with the same give-and-take logic.
 
-All actions run on a schedule (or on demand) in GitHub Actions.
+All actions run on a schedule (or on demand) in GitHub Actions, so you never need to manually review your follow list.
 
 ## How it works
-The motto **“You only get what you give”** was our starting point when we crafted GitGrowBot’s behavior:
+The motto **“You only get what you give”** drives GitGrowBot’s behavior:
 
 1. GitGrowBot **follow** someone for you—chances are, they’ll notice and **follow you back** (especially if they’re clever like you and use GitGrowBot too!).  
-2. If they **don’t** reciprocate by the next run, GitGrowBot quietly **unfollows** them (**reciprocity** matters).
+2. If they **don’t** reciprocate by the next run, GitGrowBot quietly **unfollows** them.
 3. Soon, we’ll extend this to **stars**: you star their repo, they star yours; you unstar, GitGrowBot unstars theirs.
 
 This ensures your follow list stays active while you're busy coding.
@@ -53,7 +51,7 @@ You can join this list too—see below (**⭐ Don't miss out: Join our 5,500+ us
 7. **Enable** GitHub Actions in your repo settings.
 9. Sit back and code—**GitGrowBot** does the networking for you!  
 
-## Local testing (Optional)
+## Local testing
 
 If you want to test the bot locally, you can use the provided `scripts/cleaner.py` and `scripts/gitgrow.py` scripts.
 
@@ -151,7 +149,3 @@ _And thank you for saying thank you! If you find this project useful, please con
 <br>
 
 – With 💛 from [@ikramagix](https://github.com/ikramagix) & [@gr33kurious](https://github.com/gr33kurious)
-
-<br>
-
-This project is uder Want to use GitGrowBot commercially? → Open an issue or email us for a paid licence.

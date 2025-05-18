@@ -1,0 +1,25 @@
+# Bytecode and compiled files
+__pycache__
+*.py[cod]
+*.pyo
+*.pyd
+
+# Testing and cache directories
+.pytest_cache
+
+# Logs
+logs/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Temporary and backup files
+*.bak
+*.swp
+*~
+
+# Environment variable files
+.env
+!.env.example
+.gitignore

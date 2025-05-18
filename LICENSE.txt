@@ -1,4 +1,5 @@
 Fair2Share Reciprocity License 1.0
+
 © 2025 Ikrame Saadi (@ikramagix) and Nikolaï Korolkov (@gr33kurious)
 
 Source code: https://github.com/ikramagix/GitGrowBot/

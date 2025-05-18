@@ -104,4 +104,14 @@ We started building GitGrowBot as a peer-to-peer coding challenge on a sleepless
 Every contribution, big or small, helps everyone grow. Thank you for pitching in!
 
 **Happy networking & happy coding!** 
+
+<div>
+<a href="https://www.buymeacoffee.com/ikramagix" target="_blank">
+  <img 
+    src="https://i.ibb.co/tP37SFx/cuphead-thx-nobg.png" 
+    alt="Buy Me A Coffee" 
+    width="150">
+</a>
+</div>
+
 – With 💛 from [@ikramagix](https://github.com/ikramagix) & ❤️ from [@gr33kurious](https://github.com/gr33kurious)

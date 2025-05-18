@@ -1,0 +1,74 @@
+Fair2Share Reciprocity License 1.0
+© 2025 Ikrame Saadi (@ikramagix) and Nikolaï Korolkov (@gr33kurious)
+
+Source code: https://github.com/ikramagix/GitGrowBot/
+
+1. Purpose
+   You may copy, study, modify, and share this Software free of
+   charge for any Non-commercial purpose (defined below).  All
+   Commercial use requires a separate licence agreement with the
+   copyright holders.  No automatic commercial “trial period” is
+   granted.
+
+2. Agreement
+   Receiving or using the Software means you accept every rule
+   in this Licence. If you cannot, or will not, follow a rule,
+   you do not have a licence.
+
+3. Notices
+   You must keep this copyright notice and the text of this
+   Licence in every copy or substantial portion of the Software,
+   with or without changes.
+
+4. Non-commercial Scope
+   4.1  Personal Uses: research, study, hobby, private
+        entertainment, testing, or religious observance without
+        anticipated commercial application are Non-commercial.
+   4.2  Qualifying Organisations: use by any charitable
+        organisation, educational institution, public-research
+        body, public-safety or health organisation, environmental
+        protection group, or government institution is
+        Non-commercial, regardless of funding source or grant
+        obligations.
+
+5. Commercial Use
+   Any other purpose is Commercial.
+   Contact us to negotiate a paid or 
+   revenue-share licence: hello@ikramagix.com
+
+6. Contributions Back
+   Feedback, changes, or additions you contribute under a
+   standard permissive licence (MIT, BSD-2-Clause, Apache-2.0,
+   BlueOak-1.0, etc.) do not count as Commercial use.
+
+7. Patent Grant
+   Each contributor grants a non-exclusive, worldwide,
+   royalty-free patent licence to make, use, sell, and distribute
+   their contributions under this Licence.
+
+8. Defense
+   You will not make any patent claim accusing the Software,
+   alone or combined with other technology, of infringement.
+
+9. Reliability
+   The contributors cannot revoke this Licence as long as you
+   comply with its terms.
+
+10. Excuse
+    If you violate Section 3 (Notices) unknowingly, you are
+    excused provided you fix the problem within thirty (30) days
+    of learning of it.
+
+11. No Warranty - No Liability
+    THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY
+    KIND.  THE CONTRIBUTORS SHALL NOT BE LIABLE FOR ANY CLAIM,
+    DAMAGES, OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT, OR
+    OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OF THE SOFTWARE.
+
+──────────────────────────────***──────────────────────────────────
+Usernames in the SAY_THANK_YOU_WHITELIST set must remain on all 
+local whitelist files so the Software will never unfollow them 
+by mistake. 
+Please keep contributors connected as a gesture of thanks! ツ
+───────────────────────────────***─────────────────────────────────

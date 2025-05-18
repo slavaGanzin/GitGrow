@@ -1,0 +1,33 @@
+# .github/workflows/manual_follow.yml
+#
+# # It is used to run the follow bot script.
+# # This is a partial workflow, and it does not include the unfollowing step.
+# # The unfollowing step is handled in a separate workflow.
+
+name: Manual Follow (Partial)
+
+on:
+  workflow_dispatch: {} # This workflow is triggered manually and does not run on any events.
+
+jobs:
+  follow:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install PyGithub
+
+      - name: Run follow bot
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: python scripts/gitgrow.py

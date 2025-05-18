@@ -1,0 +1,52 @@
+# .github/workflows/run_bot.yml
+# name: GitGrowBot Scheduled Runner (Global)
+# #
+# # This workflow is used to run the GitGrowBot scripts on a schedule.
+# # It is triggered by a cron schedule and can also be run manually.
+# #
+# # The workflow is designed to run the unfollow bot and the follow bot.
+# # The unfollow bot is responsible for unfollowing users who do not follow back.
+# # The follow bot is responsible for following new users from our 5500+ users.
+# #
+
+name: GitGrowBot Scheduled Runner (Global)
+
+on:
+  schedule:
+    # Example: every 1 hours at minute 5 
+    - cron: '5 */1 * * *'
+    # Or uncomment one of these for a different interval:
+    # - cron: '5 */ * * *'      # every 2 hours at :05
+    # - cron: '5 */3 * * *'    # every 3 hours at :05
+
+  workflow_dispatch: {}
+
+jobs:
+  follow:
+    # Run only for the configured BOT_USER (your username, from GitHub Actions secrets and variables)
+    # This is to prevent the bot from running on forks or other users' repositories.
+    if: github.actor == vars.BOT_USER || github.repository_owner == vars.BOT_USER
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3  # Check out the repository
+
+      - name: Set up Python
+        uses: actions/setup-python@v4  # Set up Python environment
+        with:
+          python-version: '3.10'  # Specify Python version
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip  # Upgrade pip
+          pip install PyGithub  # Install PyGithub package
+
+      - name: Unfollow non-reciprocals
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # Use GitHub token from secrets
+        run: python scripts/unfollowers.py  # Run script to unfollow users who do not follow back
+
+      - name: Run follow bot
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # Use GitHub token from secrets
+        run: python scripts/gitgrow.py  # Run script to follow new users

@@ -17,8 +17,8 @@ def main():
     gh = Github(token)  # Initialize GitHub client
 
     base_dir = Path(__file__).parent  # Determine base directory of the script
-    username_path = base_dir / "usernames.txt"  # Path to the usernames file
-    log_dir = base_dir / "logs"  # Path to the logs directory
+    username_path = base_dir.parent / "config" / "usernames.txt"  # Path to the usernames file in the config directory
+    log_dir = base_dir.parent / "logs"  # Path to the logs directory
     log_dir.mkdir(exist_ok=True)  # Create logs directory if it does not exist
 
     if not username_path.exists():

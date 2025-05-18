@@ -1,6 +1,8 @@
+# tests/test_gitgrow_behavior.py
+import pytest
 from importlib import util
 from pathlib import Path
-import pytest
+from github import GithubException
 
 def load_script(path):
     project_root = Path(__file__).parent.parent
@@ -16,37 +18,52 @@ class DummyUser:
 class DummyMe:
     def __init__(self):
         self.login = "me"
-        self._followers = [DummyUser("alice")]
-        self._following = [DummyUser("alice")]
+        # followers & following both contain these → no follow-back
+        self._followers = [DummyUser(u) for u in ["sotiris", "zakaria"]]
+        self._following = [DummyUser(u) for u in ["sotiris", "zakaria"]]
         self.added = []
+
     def get_followers(self): return self._followers
     def get_following(self): return self._following
+
     def add_to_following(self, user):
         self.added.append(getattr(user, "login", user))
 
 class DummyGithub:
     def __init__(self, me): self._me = me
+
     def get_user(self, *args, **kwargs):
-        return self._me if not args else DummyUser(args[0])
+        # no args → authenticated user
+        if not args:
+            return self._me
+        login = args[0]
+        # simulate missing user
+        if login == "dne":
+            raise GithubException(404, {"message": "Not Found"})
+        return DummyUser(login)
 
 @pytest.fixture(autouse=True)
-def fake_github(monkeypatch, tmp_path):
-    cfg = tmp_path / "config"; cfg.mkdir()
-    (cfg / "usernames.txt").write_text("bob\ncarol\nalice\n")
-    (cfg / "whitelist.txt").write_text("carol\n")
-
+def fake_github(monkeypatch):
+    # fake token + patch Github()
     monkeypatch.setenv("GITHUB_TOKEN", "fake")
     me = DummyMe()
     monkeypatch.setattr("github.Github", lambda token: DummyGithub(me))
-    monkeypatch.chdir(tmp_path)
     return me
 
-def test_gitgrow_follow_and_back(fake_github, capsys):
+def test_gitgrow_follow_and_back(fake_github, patch_config, capsys):
     bot = load_script(Path("scripts/gitgrow.py"))
     bot.main()
-    # should follow bob only (carol whitelisted, alice already)
-    assert "bob" in fake_github.added
-    assert "carol" not in fake_github.added
+
+    # should follow only irene & guadalupe
+    assert "irene" in fake_github.added
+    assert "guadalupe" in fake_github.added
+
+    # never touch existing or whitelisted
+    assert "sotiris" not in fake_github.added
+    assert "zakaria" not in fake_github.added
+
     out = capsys.readouterr().out
-    assert "[FOLLOWED] bob" in out
-    assert "[FOLLOW-BACKED]" not in out  # only alice followers already
+    assert "[FOLLOWED] irene" in out
+    assert "[FOLLOWED] guadalupe" in out
+    # no follow-back because followers == following
+    assert "[FOLLOW-BACKED]" not in out

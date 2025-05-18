@@ -1,17 +1,15 @@
-# .github/workflows/run_bot.yml
-name: GitGrowBot Scheduled Runner (Global)
+name: Manual Unfollow
 
 on:
-  schedule:
-    - cron: '5 */1 * * *'
-  workflow_dispatch: {}
+  workflow_dispatch: {}   # This workflow is triggered manually and does not run on any events.
 
 jobs:
-  follow:
+  unfollow:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Check out code
+        uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -23,12 +21,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install PyGithub
 
-      - name: Unfollow non-reciprocals
+      - name: Run unfollow bot
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: python scripts/unfollowers.py
-
-      - name: Run follow bot
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-        run: python scripts/bot_core.py

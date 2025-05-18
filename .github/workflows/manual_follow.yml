@@ -1,4 +1,4 @@
-name: Manual Follow
+name: Manual Follow (Partial)
 
 on:
   workflow_dispatch: {} # This workflow is triggered manually and does not run on any events.
@@ -24,4 +24,4 @@ jobs:
       - name: Run follow bot
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-        run: python scripts/bot_core.py
+        run: python scripts/gitgrow.py

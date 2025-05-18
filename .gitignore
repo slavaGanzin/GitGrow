@@ -1,0 +1,30 @@
+# Bytecode and compiled files
+__pycache__/           # Python's cached bytecode
+*.py[cod]              # Compiled Python files (alternative pattern)
+*.pyo                  # Optimized files
+*.pyd                  # Windows DLL-style files
+
+# Testing and cache directories
+.pytest_cache/         # Pytest cache files
+
+# Logs
+logs/                  # Log files directory
+
+# IDE/editor settings (personal configuration, not needed in repo)
+.vscode/               # VS Code settings
+.idea/                 # IntelliJ/PyCharm settings
+*.sublime-project      # Sublime Text project files
+*.sublime-workspace    # Sublime Text workspace files
+
+# Operating system files
+.DS_Store              # macOS metadata
+Thumbs.db              # Windows image cache
+
+# Temporary and backup files
+*.bak                  # Backup files
+*.swp                  # Swap files (common in Vim)
+*~                     # Temporary files
+
+# Environment variable files
+.env                   # Actual environment file (should be kept secret)
+!.env.example.env      # Example environment file for reference

@@ -1,5 +1,4 @@
 # GitGrowBot 
-*Build and nurture your GitHub network with automation. Easily follow, unfollow, star, and unstar on autopilot ✈️ so you can focus on coding while your community grows.*
 
 GitGrowBot is your personal GitHub networking assistant. It's an automation tool designed to help you **grow** and **nurture** your developer network organically. With GitGrowBot, you’ll:
 
@@ -42,7 +41,7 @@ This ensures your follow list stays active while you're busy coding.
 ## Getting started
 
 1. **Fork** or **clone** this repo.
-2. In **Settings → Secrets → Actions**, add your Github PA Token as `PAT_TOKEN` (scope: `user:follow`).
+2. In **Settings → Secrets → Actions**, add your Github PAT as `PAT_TOKEN` (scope: `user:follow`).
 3. **5,500+ members like you who want to grow are waiting for you in** `config/usernames.txt`. You can join this list too—see below (**⭐ Don't miss out: Join our 5,500+ users**).
 4. Edit the `schedule.cron` in `run_bot.yml` to your desired interval.
 5. (Important) Edit `config/whitelist.txt` to protect any accounts you never want the script to act on (mostly for not unfollowing them or unstarring their repositories).
@@ -96,9 +95,13 @@ Let's grow! 💪
 │   └── offline_usernames-*.txt
 ├── requirements.txt
 └── scripts
-    ├── gitgrow.py               # Main follow/unfollow driver
-    ├── unfollowers.py           # Unfollow-only logic
-    └── cleaner.py               # Username list maintenance
+│   ├── gitgrow.py               # Main follow/unfollow driver
+│   ├── unfollowers.py           # Unfollow-only logic
+│   └── cleaner.py               # Username list maintenance
+├──tests/
+│   ├── test_bot_core_behavior.py   # follow/unfollow/follow-back
+│   ├── test_unfollowers.py         # unfollow-only logic
+│   └── test_cleaner.py             # cleaner dedupe + missing-user removal
 ```
 ### Manual Troubleshooting Runners (optional)
 
@@ -131,5 +134,7 @@ Every contribution, big or small, helps everyone grow. Thank you for pitching in
     width="150">
 </a>
 </div>
+
 <br>
+
 – With 💛 from [@ikramagix](https://github.com/ikramagix) & [@gr33kurious](https://github.com/gr33kurious)

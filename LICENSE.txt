@@ -67,9 +67,8 @@ Source code: https://github.com/ikramagix/GitGrowBot/
     OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE
     SOFTWARE OR THE USE OF THE SOFTWARE.
 
-──────────────────────────────***──────────────────────────────────
+────────────────────────────────────────────────────────────────
 Usernames in the SAY_THANK_YOU_WHITELIST set must remain on all 
-local whitelist files so the Software will never unfollow them 
-by mistake. 
+local whitelist files.
 Please keep contributors connected as a gesture of thanks! ツ
-───────────────────────────────***─────────────────────────────────
+────────────────────────────────────────────────────────────────

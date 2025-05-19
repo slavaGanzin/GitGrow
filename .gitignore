@@ -23,3 +23,7 @@ Thumbs.db
 .env
 !.env.example
 .gitignore
+
+# Drafts
+.github/workflows/run_follow.yml
+.github/workflows/run_unfollow.py

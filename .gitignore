@@ -26,4 +26,4 @@ Thumbs.db
 
 # Drafts
 .github/workflows/run_follow.yml
-.github/workflows/run_unfollow.py
+.github/workflows/run_unfollow.yml

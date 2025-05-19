@@ -14,39 +14,78 @@ name: GitGrowBot Scheduled Runner (Global)
 on:
   schedule:
     # Example: every 1 hours at minute 5 
-    - cron: '5 */1 * * *'
-    # Or uncomment one of these for a different interval:
+    # - cron: '5 */1 * * *'
+    # Uncomment one of these for a different interval:
     # - cron: '5 */ * * *'      # every 2 hours at :05
     # - cron: '5 */3 * * *'    # every 3 hours at :05
+    # - cron: '5 */4 * * *'    # every 4 hours at :05
+    # Currently workflows are seperately running but kept in hub file for convenience and each set to run:
+    # Hourly follow every hour at minute 5
+    - cron: '5 * * * *'
+    # Weekly unfollow on Mondays at 21:05 UTC
+    - cron: '5 21 * * 1'
 
   workflow_dispatch: {}
 
 jobs:
-  follow:
+  unfollow:
     # Run only for the configured BOT_USER (your username, from GitHub Actions secrets and variables)
     # This is to prevent the bot from running on forks or other users' repositories.
     if: github.actor == vars.BOT_USER || github.repository_owner == vars.BOT_USER
-    runs-on: ubuntu-latest
 
+    name: Weekly Unfollow (Tue 00:05 UTC+3)
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
     steps:
-      - uses: actions/checkout@v3  # Check out the repository
+      - name: Bail unless it’s Tuesday local (UTC+3)
+        run: |
+          # GitHub runners are UTC; add 3h to get your local day-of-week
+          DOW=$(date -u -d '+3 hours' +'%u')
+          if [ "$DOW" != "2" ]; then
+            echo "Not Tuesday (UTC+3). Skipping unfollow."
+            exit 0
+          fi
+
+      - name: Check out code
+        uses: actions/checkout@v3  # Check out the code
 
       - name: Set up Python
         uses: actions/setup-python@v4  # Set up Python environment
         with:
-          python-version: '3.10'  # Specify Python version
+          python-version: '3.10'  # Specify Python version 3.10
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip  # Upgrade pip
           pip install PyGithub  # Install PyGithub package
 
-      - name: Unfollow non-reciprocals
+      - name: Run unfollowers
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # Use GitHub token from secrets
-        run: python scripts/unfollowers.py  # Run script to unfollow users who do not follow back
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # GitHub token from secrets
+          WHITELIST_FILE: "config/whitelist.txt"  # Path to whitelist file
+        run: python scripts/unfollowers.py  # Run the unfollowers script
+
+  follow:
+    name: Hourly Follow
+    needs: unfollow  # Ensure code is checked out & dependencies are fresh
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3  # Check out the code
+
+      - name: Set up Python
+        uses: actions/setup-python@v4  # Set up Python environment
+        with:
+          python-version: '3.10'  # Specify Python version 3.10
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip  # Upgrade pip
+          pip install PyGithub  # Install PyGithub package
 
       - name: Run follow bot
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # Use GitHub token from secrets
-        run: python scripts/gitgrow.py  # Run script to follow new users
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # GitHub token from secrets
+          USERNAME_FILE: "config/usernames.txt"  # Path to usernames file
+          WHITELIST_FILE: "config/whitelist.txt"  # Path to whitelist file
+          FOLLOWERS_PER_RUN: "155"  # Number of followers to process per run
+        run: python scripts/gitgrow.py  # Run the follow bot script

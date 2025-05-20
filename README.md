@@ -47,10 +47,12 @@ This ensures your follow list stays active while you're busy coding.
 3. In **Settings → Variables → Repository variables**, add **`BOT_USER`** with _your_ GitHub username. *This prevents the workflow from running in other people’s forks unless they set their own name.*
 4. **5,500 + members like you who want to grow are waiting for you in** `config/usernames.txt`.  
 You can join this list too—see below (**⭐ Don't miss out: Join our 5,500+ users**).
-4. Edit the `schedule.cron` in `run_bot.yml` to your desired interval. The default pre-set is an hourly run.
-5. (Important) Edit `config/whitelist.txt` to protect any accounts you never want the script to act on (no unfollowing, no unstarring for usernames in `whitelist.txt`).
-6. (Optional) Copy `.env.example` → `.env` for local testing (or contributors).
-7. **Enable** GitHub Actions in your repo settings.
+5. (Optional) Tweak the schedules in your workflow files:
+    - `.github/workflows/run_follow.yml` runs **hourly at minute 5** by default.
+    - `.github/workflows/run_unfollow.yml` runs **weekly on Tuesdays at 21:05** (UTC) by default.
+6. (Important) Edit `config/whitelist.txt` to protect any accounts you never want the script to act on (no unfollowing, no unstarring for usernames in `whitelist.txt`).
+7. (Optional) Copy `.env.example` → `.env` for local testing (or contributors).
+8. **Enable** GitHub Actions in your repo settings.
 9. Sit back and code—**GitGrowBot** does the networking for you!  
 
 ## Local testing
@@ -94,7 +96,8 @@ Let's grow! 💪
 ├── .gitattributes
 ├── .github
 │   └── workflows
-│       ├── run_bot.yml          # Scheduled: unfollow + follow
+│       ├── run_follow.yml       # Scheduled: follow-only (hourly @ :05)
+│       ├── run_unfollow.yml     # Scheduled: unfollow-only (Tuesdays @ 21:05 UTC)
 │       ├── manual_follow.yml    # workflow_dispatch → follow only
 │       └── manual_unfollow.yml  # workflow_dispatch → unfollow only
 ├── .gitignore

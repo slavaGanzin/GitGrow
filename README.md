@@ -1,4 +1,5 @@
-[![GitGrowBot Scheduled Runner (Global)](https://github.com/ikramagix/GitGrowBot/actions/workflows/run_bot.yml/badge.svg)](https://github.com/ikramagix/GitGrowBot/actions/workflows/run_bot.yml)
+[![GitGrowBot Follower (Scheduled hourly)](https://github.com/ikramagix/GitGrowBot/actions/workflows/run_follow.yml/badge.svg)](https://github.com/ikramagix/GitGrowBot/actions/workflows/run_follow.yml)
+[![GitGrowBot Unfollower (Scheduled weekly)](https://github.com/ikramagix/GitGrowBot/actions/workflows/run_unfollow.yml/badge.svg)](https://github.com/ikramagix/GitGrowBot/actions/workflows/run_unfollow.yml)
 
 # GitGrowBot 
 
@@ -8,7 +9,7 @@ GitGrowBot is your personal GitHub networking assistant. It's an automation tool
 * **Unfollow** anyone who doesn’t follow you back, because **reciprocity** matters.
 * (COMING SOON) **Star** and **unstar** repositories with the same give-and-take logic.
 
-All actions run on a schedule (or on demand) in GitHub Actions, so you never need to manually review your follow list.
+All actions run on a schedule (or on demand) in GitHub Actions, so you never need to manually review your follow list. 
 
 ## How it works
 The motto **“You only get what you give”** drives GitGrowBot’s behavior:
@@ -140,7 +141,8 @@ Every contribution, big or small, helps everyone grow. Thank you for pitching in
 
 **Happy networking & happy coding!** 
 _And thank you for saying thank you! If you find this project useful, please consider giving it a star or supporting us on **buymeacoffee** below._
-## Support
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/ikramagix)
 
 <div>
 <a href="https://www.buymeacoffee.com/ikramagix" target="_blank">

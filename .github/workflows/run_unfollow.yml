@@ -1,0 +1,34 @@
+# .github/workflows/run_unfollow.yml
+name: GitGrowBot Unfollower (Scheduled weekly)
+# This workflow is used to run the GitGrowBot unfollow bot on a schedule.
+# It is triggered by a cron schedule and can also be run manually.
+# The workflow is designed to run the unfollow bot.
+# The unfollow bot is responsible for unfollowing users who do not follow back.
+# The follow bot is run in a different workflow (run_follow.yml) to keep the workflows separate.
+
+on:
+  schedule:
+    - cron: '5 21 * * 1'   # every Monday at 21:05 UTC → Tuesday 00:05 UTC+3
+  workflow_dispatch: {}
+
+jobs:
+  unfollow:
+    # Run only for the configured BOT_USER (your username, from GitHub Actions secrets and variables)
+    # This is to prevent the bot from running on forks or other users' repositories.
+    if: github.actor == vars.BOT_USER || github.repository_owner == vars.BOT_USER
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3  # Checkout the repository
+      - name: Setup Python
+        uses: actions/setup-python@v4  # Setup Python environment
+        with:
+          python-version: '3.10'  # Specify Python version
+      - name: Install deps
+        run: |
+          pip install --upgrade pip  # Upgrade pip
+          pip install PyGithub  # Install PyGithub package
+      - name: Run unfollowers
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # GitHub token for authentication
+          WHITELIST_FILE: config/whitelist.txt  # Path to whitelist file
+        run: python scripts/unfollowers.py  # Run the unfollowers script

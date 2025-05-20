@@ -1,0 +1,44 @@
+# .github/workflows/run_follow.yml
+name: GitGrowBot Follower (Scheduled hourly)
+# This workflow is used to run the GitGrowBot follow bot on a schedule.
+# It is triggered by a cron schedule and can also be run manually.
+# The workflow is designed to run the follow bot.
+# The follow bot is responsible for following new users from our 5500+ users.
+# The unfollow bot is run in a different workflow (run_unfollow.yml) to keep the workflows separate.
+
+# Runs every hour at minute 5, and you can still trigger it manually
+on:
+  schedule:
+    # Example: every 1 hours at minute 5 
+    - cron: '5 */1 * * *'
+    # Uncomment one of these for a different interval:
+    # - cron: '5 */ * * *'      # every 2 hours at :05
+    # - cron: '5 */3 * * *'    # every 3 hours at :05
+    # - cron: '5 */4 * * *'    # every 4 hours at :05
+  workflow_dispatch: {}  # Allows manual triggering of the workflow
+
+jobs:
+  follow:
+    # Run only for the configured BOT_USER (your username, from GitHub Actions secrets and variables)
+    # This is to prevent the bot from running on forks or other users' repositories.
+    if: github.actor == vars.BOT_USER || github.repository_owner == vars.BOT_USER
+
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+
+    steps:
+      - uses: actions/checkout@v3   # Check out the code
+      - name: Set up Python
+        uses: actions/setup-python@v4  # Set up Python environment
+        with:
+          python-version: '3.10'  # Specify Python version 3.10
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip  # Upgrade pip
+          pip install PyGithub  # Install PyGithub package
+      - name: Run follow bot
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # GitHub token from secrets
+          USERNAME_FILE: "config/usernames.txt"  # Path to usernames file
+          WHITELIST_FILE: "config/whitelist.txt"  # Path to whitelist file
+          FOLLOWERS_PER_RUN: "100"  # Number of followers to process per run
+        run: python scripts/gitgrow.py  # Run the follow bot script

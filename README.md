@@ -24,7 +24,7 @@ This ensures your follow list stays active while you're busy coding.
 
 - **Automated Follow / Unfollow**  
   - Follow 100 fresh users each run.  
-  - Unfollow non-reciprocals first.  
+  - Unfollow non-reciprocals.  
   - Skip any usernames you whitelist.  
 - **Cleaner utility** (`scripts/cleaner.py`)  
   - Deduplicates and prunes dead GitHub usernames locally.  
@@ -50,7 +50,7 @@ This ensures your follow list stays active while you're busy coding.
 You can join this list too—see below (**⭐ Don't miss out: Join our 5,500+ users**).
 5. (Optional) Tweak the schedules in your workflow files:
     - `.github/workflows/run_follow.yml` runs **hourly at minute 5** by default.
-    - `.github/workflows/run_unfollow.yml` runs **weekly on Tuesdays at 21:05** (UTC) by default.
+    - `.github/workflows/run_unfollow.yml` runs **daily at 05:05** (UTC) by default.
 6. (Important) Edit `config/whitelist.txt` to protect any accounts you never want the script to act on (no unfollowing, no unstarring for usernames in `whitelist.txt`).
 7. (Optional) Copy `.env.example` → `.env` for local testing (or contributors).
 8. **Enable** GitHub Actions in your repo settings.
@@ -98,7 +98,7 @@ Let's grow! 💪
 ├── .github
 │   └── workflows
 │       ├── run_follow.yml       # Scheduled: follow-only (hourly @ :05)
-│       ├── run_unfollow.yml     # Scheduled: unfollow-only (Tuesdays @ 21:05 UTC)
+│       ├── run_unfollow.yml     # Scheduled: unfollow-only (daily @ 05:05 UTC)
 │       ├── manual_follow.yml    # workflow_dispatch → follow only
 │       └── manual_unfollow.yml  # workflow_dispatch → unfollow only
 ├── .gitignore

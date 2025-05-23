@@ -37,7 +37,8 @@ This ensures your follow list stays active while you're busy coding.
   - `scripts/gitgrow.py` for main logic.  
   - `scripts/cleaner.py` for list maintenance.  
 - **Prebuilt Workflow**  
-  - `.github/workflows/run_bot.yml` scheduled runner every 1, 3, or 5 hours (configurable).
+  - `.github/workflows/run_follow.yml`: Runs **every hour at minute 5** (UTC) by default.
+  - `.github/workflows/run_unfollow.yml` runs **every 10 hours at minute 5** (UTC) by default.
   - `.github/workflows/manual_follow.yml` – manual trigger: **follow & follow-back only**  
   - `.github/workflows/manual_unfollow.yml` – manual trigger: **unfollow non-reciprocals only**  
 
@@ -50,7 +51,7 @@ This ensures your follow list stays active while you're busy coding.
 You can join this list too—see below (**⭐ Don't miss out: Join our 5,500+ users**).
 5. (Optional) Tweak the schedules in your workflow files:
     - `.github/workflows/run_follow.yml` runs **hourly at minute 5** by default.
-    - `.github/workflows/run_unfollow.yml` runs **daily at 05:05** (UTC) by default.
+    - `.github/workflows/run_unfollow.yml` runs **every 10 hours at minute 5** (UTC) by default.
 6. (Important) Edit `config/whitelist.txt` to protect any accounts you never want the script to act on (no unfollowing, no unstarring for usernames in `whitelist.txt`).
 7. (Optional) Copy `.env.example` → `.env` for local testing (or contributors).
 8. **Enable** GitHub Actions in your repo settings.

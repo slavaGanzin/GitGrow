@@ -47,8 +47,8 @@ This ensures your follow list stays active while you're busy coding.
 1. **Fork** or **clone** this repo.
 2. In **Settings → Secrets → Actions**, add your Github PAT as `PAT_TOKEN` (scope: `user:follow`).
 3. In **Settings → Variables → Repository variables**, add **`BOT_USER`** with _your_ GitHub username. *This prevents the workflow from running in other people’s forks unless they set their own name.*
-4. **5,500 + members like you who want to grow are waiting for you in** `config/usernames.txt`.  
-You can join this list too—see below (**⭐ Don't miss out: Join our 5,500+ users**).
+4. **10K+ members like you who want to grow are waiting for you in** `config/usernames.txt`.  
+You can join this list too—see below (**⭐ Don't miss out: Join our 10000+ users**).
 5. (Optional) Tweak the schedules in your workflow files:
     - `.github/workflows/run_follow.yml` runs **hourly at minute 5** by default.
     - `.github/workflows/run_unfollow.yml` runs **every 10 hours at minute 5** (UTC) by default.
@@ -72,14 +72,14 @@ python scripts/cleaner.py
 python scripts/gitgrow.py
 ```
 
-## ⭐ Don't miss out: Join our 5,500+ users!
+## ⭐ Don't miss out: Join our 10000+ users!
 
 Want in? It’s effortless. If you:
 
 1. **Star** this repository, **AND**
 2. **Follow** both **[@ikramagix](https://github.com/ikramagix)** and **[@gr33kurious](https://github.com/gr33kurious)**
 
-then your username will be **automatically** added to the master `usernames.txt` list alongside the **5,500+** active members!
+then your username will be **automatically** added to the master `usernames.txt` list alongside the **10K+** active members!
 
 Let's grow! 💪
 
@@ -99,7 +99,7 @@ Let's grow! 💪
 ├── .github
 │   └── workflows
 │       ├── run_follow.yml       # Scheduled: follow-only (hourly @ :05)
-│       ├── run_unfollow.yml     # Scheduled: unfollow-only (daily @ 05:05 UTC)
+│       ├── run_unfollow.yml     # Scheduled: unfollow-only (daily every 10 hours @ :05 UTC)
 │       ├── manual_follow.yml    # workflow_dispatch → follow only
 │       └── manual_unfollow.yml  # workflow_dispatch → unfollow only
 ├── .gitignore

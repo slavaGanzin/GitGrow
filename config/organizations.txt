@@ -1,0 +1,10 @@
+openai
+microsoft
+DeepSeek-AI
+google
+github
+huggingface
+TheAlgorithms
+EpicGames
+facebook
+facebookresearch

@@ -8,3 +8,13 @@ TheAlgorithms
 EpicGames
 facebook
 facebookresearch
+microsoftopensource
+Microsoft-OpenSource-Labs
+AzurePipelines
+meta-llama
+facebookarchive
+facebookincubator
+facebookexperimental
+fbsamples
+apple
+apple-oss-distributions

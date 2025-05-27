@@ -66,10 +66,10 @@ def main():
                 print(f"[PRIVATE] {login} inaccessible: {e}")
             continue
 
-        # — activity filter (last 30 days) —
+        # — activity filter (last 5 days) —
         try:
             events = user.get_events()
-            last_event = next(events, None)
+            last_event = next(iter(events), None)
             if not last_event or last_event.created_at < datetime.utcnow() - timedelta(days=30):
                 print(f"[SKIP] {login} inactive (last event: {last_event.created_at if last_event else 'none'})")
                 continue

@@ -4,6 +4,7 @@ import sys
 import random
 from pathlib import Path
 from github import Github, GithubException
+from datetime import datetime, timedelta
 
 def main():
     # — Auth & client setup —
@@ -53,16 +54,27 @@ def main():
         if ll == me.login.lower() or ll in whitelist or ll in following:
             continue  # Skip if the username is the authenticated user, in the whitelist, or already followed
 
-        # existence check
+        # — existence check —
         try:
             user = gh.get_user(login)  # Check if the user exists
         except GithubException as e:
             if getattr(e, "status", None) == 404:
                 notfound_new.append(login)
-                print(f"[SKIP] {login} not found")  # Skip if the user is not found
+                print(f"[SKIP] {login} not found")
             else:
                 private_new.append(login)
-                print(f"[PRIVATE] {login} inaccessible: {e}")  # Skip if the user is private/inaccessible
+                print(f"[PRIVATE] {login} inaccessible: {e}")
+            continue
+
+        # — activity filter (last 30 days) —
+        try:
+            events = user.get_events()
+            last_event = next(events, None)
+            if not last_event or last_event.created_at < datetime.utcnow() - timedelta(days=30):
+                print(f"[SKIP] {login} inactive (last event: {last_event.created_at if last_event else 'none'})")
+                continue
+        except GithubException as e:
+            print(f"[WARN] could not fetch events for {login}, skipping: {e}")
             continue
 
         # attempt follow

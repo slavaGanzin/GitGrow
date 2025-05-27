@@ -18,3 +18,16 @@ facebookexperimental
 fbsamples
 apple
 apple-oss-distributions
+freeCodeCamp
+EbookFoundation
+jwasham
+kamranahmedse
+public-apis
+donnemartin
+codecrafters-io
+tensorflow
+getify
+trekhleb
+twbs
+vinta
+ohmyzsh

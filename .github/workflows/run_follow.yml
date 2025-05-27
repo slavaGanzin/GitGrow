@@ -40,5 +40,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # GitHub token from secrets
           USERNAME_FILE: "config/usernames.txt"  # Path to usernames file
           WHITELIST_FILE: "config/whitelist.txt"  # Path to whitelist file
-          FOLLOWERS_PER_RUN: "100"  # Number of followers to process per run
+          FOLLOWERS_PER_RUN: "1000"  # Number of followers to process per run
         run: python scripts/gitgrow.py  # Run the follow bot script

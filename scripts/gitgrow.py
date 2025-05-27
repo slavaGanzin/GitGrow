@@ -17,7 +17,7 @@ def main():
     base_dir  = Path(__file__).parent.parent.resolve()  # Determine base directory of the repository
     user_path = base_dir / "config" / "usernames.txt"  # Path to the usernames configuration file
     white_path= base_dir / "config" / "whitelist.txt"  # Path to the whitelist configuration file
-    per_run   = 100  # Number of users to follow per run
+    per_run = int(os.getenv("FOLLOWERS_PER_RUN", 100))  # Number of users to follow per run, set by workflow .yml file with a fallback default value of 100
 
     # — Load whitelist —
     if white_path.exists():

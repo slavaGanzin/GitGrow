@@ -1,4 +1,5 @@
 [![GitGrowBot Follower (Scheduled hourly)](https://github.com/ikramagix/GitGrowBot/actions/workflows/run_follow.yml/badge.svg)](https://github.com/ikramagix/GitGrowBot/actions/workflows/run_follow.yml)
+
 [![GitGrowBot Unfollower (Scheduled weekly)](https://github.com/ikramagix/GitGrowBot/actions/workflows/run_unfollow.yml/badge.svg)](https://github.com/ikramagix/GitGrowBot/actions/workflows/run_unfollow.yml)
 
 # GitGrowBot 

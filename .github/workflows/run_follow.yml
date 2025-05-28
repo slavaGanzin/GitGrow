@@ -1,44 +1,45 @@
 # .github/workflows/run_follow.yml
 name: GitGrowBot Follower (Scheduled hourly)
 # This workflow is used to run the GitGrowBot follow bot on a schedule.
-# It is triggered by a cron schedule and can also be run manually.
-# The workflow is designed to run the follow bot.
-# The follow bot is responsible for following new users from our 5500+ users.
-# The unfollow bot is run in a different workflow (run_unfollow.yml) to keep the workflows separate.
+# It is triggered every hour at minute 5, and can also be run manually.
+# The follow bot processes a random number of new follows (5–25) each run.
+# The unfollow bot runs separately on its own schedule.
 
-# Runs every hour at minute 5, and you can still trigger it manually
 on:
   schedule:
-    # Example: every 1 hours at minute 5 
-    - cron: '5 */1 * * *'
-    # Uncomment one of these for a different interval:
-    # - cron: '5 */ * * *'      # every 2 hours at :05
-    # - cron: '5 */3 * * *'    # every 3 hours at :05
-    # - cron: '5 */4 * * *'    # every 4 hours at :05
-  workflow_dispatch: {}  # Allows manual triggering of the workflow
+    - cron: '5 */1 * * *'     # every hour at minute 5 (UTC)
+  workflow_dispatch: {}      # allows manual triggering
 
 jobs:
   follow:
-    # Run only for the configured BOT_USER (your username, from GitHub Actions secrets and variables)
-    # This is to prevent the bot from running on forks or other users' repositories.
+    name: Run Follow Bot
     if: github.actor == vars.BOT_USER || github.repository_owner == vars.BOT_USER
-
-    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3   # Check out the code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Set up Python
-        uses: actions/setup-python@v4  # Set up Python environment
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.10'  # Specify Python version 3.10
+          python-version: '3.10'
+
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip  # Upgrade pip
-          pip install PyGithub  # Install PyGithub package
+          python -m pip install --upgrade pip
+          pip install PyGithub
+
+      - name: Generate random follow batch size
+        run: |
+          BATCH_SIZE=$(shuf -i 5-25 -n1)
+          echo "FOLLOWERS_PER_RUN=$BATCH_SIZE" >> $GITHUB_ENV
+          echo "Generated FOLLOWERS_PER_RUN=$BATCH_SIZE"
+
       - name: Run follow bot
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # GitHub token from secrets
-          USERNAME_FILE: "config/usernames.txt"  # Path to usernames file
-          WHITELIST_FILE: "config/whitelist.txt"  # Path to whitelist file
-          FOLLOWERS_PER_RUN: "105"  # Number of followers to process per run by script
-        run: python scripts/gitgrow.py  # Run the follow bot script
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}        # personal access token with user:follow scope
+          USERNAME_FILE: config/usernames.txt
+          WHITELIST_FILE: config/whitelist.txt
+          FOLLOWERS_PER_RUN: ${{ env.FOLLOWERS_PER_RUN }}
+        run: python scripts/gitgrow.py

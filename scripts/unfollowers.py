@@ -6,9 +6,9 @@ from github import Github, GithubException
 
 def main():
     # — Auth & client setup —
-    token = os.getenv("GITHUB_TOKEN")  # Retrieve GitHub token from environment variables
+    token = os.getenv("PAT_TOKEN")  # Retrieve GitHub token from environment variables
     if not token:
-        sys.exit("GITHUB_TOKEN environment variable is required")  # Exit if token is not found
+        sys.exit("PAT_TOKEN environment variable is required")  # Exit if token is not found
     gh = Github(token)  # Initialize GitHub client
     me = gh.get_user()  # Get authenticated user
 

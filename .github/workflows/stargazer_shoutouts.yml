@@ -1,0 +1,53 @@
+# .github/workflows/stargazer_shoutouts.yml
+name: GitGrowBot Stargazer Shoutouts (Daily)
+# Automatically welcome new stargazers in Discussions.
+# Runs daily at 06:15, 12:15 and 18:15 UTC, or manually via the GitHub UI.
+
+on:
+  schedule:
+    - cron: '15 6 * * *'    # daily at 06:15 UTC
+    - cron: '15 12 * * *'   # daily at 12:15 UTC
+    - cron: '15 18 * * *'   # daily at 18:15 UTC
+  workflow_dispatch:         # allows manual triggering of the workflow
+
+jobs:
+  shout:
+    runs-on: ubuntu-latest   # use the latest Ubuntu runner
+    permissions:
+      contents: write        # grant write permissions to contents
+
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}  # use the personal access token from secrets
+          ref: feature/discussion-stargazer-shoutouts  # checkout the specific feature branch
+          fetch-depth: 0    # fetch all history for all branches and tags
+
+      - name: Set up Python & deps
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'  # specify Python version 3.10
+      - run: pip install PyGithub  # install PyGithub package
+
+      - name: Run shout-out bot
+        env:
+          PAT_TOKEN:             ${{ secrets.PAT_TOKEN }}  # set PAT_TOKEN environment variable
+          GITHUB_REPOSITORY:     ${{ github.repository }}  # set GITHUB_REPOSITORY environment variable
+          WELCOME_DISCUSSION_ID: ${{ secrets.WELCOME_DISCUSSION_ID }}  # set WELCOME_DISCUSSION_ID environment variable
+        run: python scripts/shoutouts.py  # run the shoutouts.py script
+
+      - name: Persist updated state
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add .github/state/stars.json
+          if git diff --cached --quiet; then
+            echo "No changes to persist."
+          else
+            COUNT=$(git log --grep='^chore: update stargazers state' --oneline | wc -l)
+            NEXT=$((COUNT + 1))
+            git commit -m "chore: update stargazers state (#${NEXT})"
+            git push origin HEAD:feature/discussion-stargazer-shoutouts
+          fi

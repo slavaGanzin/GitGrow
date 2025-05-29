@@ -31,6 +31,6 @@ jobs:
 
       - name: Run organization follow/refollow
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           python scripts/orgs.py

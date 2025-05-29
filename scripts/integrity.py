@@ -14,9 +14,9 @@ from github import Github, GithubException
 
 def main():
     load_dotenv()
-    token = os.getenv("GITHUB_TOKEN")
+    token = os.getenv("PAT_TOKEN")
     if not token:
-        sys.exit("Error: GITHUB_TOKEN environment variable is required")
+        sys.exit("Error: PAT_TOKEN environment variable is required")
     gh = Github(token)
 
     base_dir      = Path(__file__).parent.parent

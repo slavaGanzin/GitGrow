@@ -29,5 +29,5 @@ jobs:
 
       - name: Run follow bot
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: python scripts/gitgrow.py

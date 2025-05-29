@@ -28,7 +28,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'  # specify Python version 3.10
-      - run: pip install PyGithub  # install PyGithub package
+      - run: pip install PyGithub==1.54.1  # install PyGithub package^compatible with get discussion call
 
       - name: Run shout-out bot
         env:

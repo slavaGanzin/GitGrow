@@ -52,9 +52,9 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.PAT_TOKEN }}
-          commit-message: chore: update stargazers state
+          commit-message: chore-update stargazers state
           branch: stargazer-state
-          title: chore: update stargazers state
+          title: chore-update stargazers state
           body: |
             This PR updates the star cache so the shoutouts bot can detect unfollows next run.
           base: main

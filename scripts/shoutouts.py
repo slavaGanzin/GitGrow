@@ -1,50 +1,48 @@
 #!/usr/bin/env python3
-import os
-import json
+import os, json
 from pathlib import Path
 import requests
 from github import Github
 
-# ── Environment ────────────────────────────────────────────────────────────────
-WELCOME_DISCUSSION_ID = int(os.environ["WELCOME_DISCUSSION_ID"])
-TOKEN                 = os.environ["PAT_TOKEN"]
-STATE_FILE            = Path(".github/state/stars.json")
+# ─── Config ───────────────────────────────────────────────────────────────────
+DISCUSSION_ID = os.environ["WELCOME_DISCUSSION_ID"]
+TOKEN         = os.environ["PAT_TOKEN"]
+REPO          = os.environ["GITHUB_REPOSITORY"]
+STATE_FILE    = Path(".github/state/stars.json")
 
-# ── GitHub setup ───────────────────────────────────────────────────────────────
+# ─── GitHub setup & REST endpoint ─────────────────────────────────────────────
 gh   = Github(TOKEN)
-repo = gh.get_repo(os.environ["GITHUB_REPOSITORY"])
-
-# REST URL for posting discussion comments
+repo = gh.get_repo(REPO)
 COMMENTS_URL = (
-    f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}"
-    f"/discussions/{WELCOME_DISCUSSION_ID}/comments"
+    f"https://api.github.com/repos/{REPO}"
+    f"/discussions/{DISCUSSION_ID}/comments"
 )
 
-# ── 1. Load last run state ─────────────────────────────────────────────────────
+# ─── 1. Load previous state ────────────────────────────────────────────────────
 STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
 if STATE_FILE.exists():
-    cache = json.loads(STATE_FILE.read_text())
-    seen  = set(cache["stars"])
+    seen = set(json.loads(STATE_FILE.read_text())["stars"])
 else:
     seen = set()
 
-# ── 2. Fetch current stargazers and diff ──────────────────────────────────────
+# ─── 2. Get current stargazers & diff ─────────────────────────────────────────
 current   = {u.login.lower() for u in repo.get_stargazers()}
 new_stars = current - seen
-un_stars  = seen - current
+un_stars  = seen    - current
 
-# ── 3. Post messages via REST ─────────────────────────────────────────────────
-def post(msg: str):
+# ─── 3. Post messages via REST ────────────────────────────────────────────────
+def post(body: str):
     resp = requests.post(
         COMMENTS_URL,
         headers={
             "Authorization": f"token {TOKEN}",
-            "Accept":        "application/vnd.github+json",
+            "Accept":        "application/vnd.github.v3+json"
         },
-        json={"body": msg},
+        json={"body": body},
     )
     resp.raise_for_status()
 
+# Welcome new stargazers
 if new_stars:
     msg = (
         "🎉 **A sky full of new stars!** 🌟 Welcome aboard: "
@@ -56,6 +54,7 @@ if new_stars:
     )
     post(msg)
 
+# Farewell unstargazers
 if un_stars:
     msg = (
         "👋 **Oh no, stars fading away...** We'll miss you: "
@@ -69,6 +68,6 @@ if un_stars:
     )
     post(msg)
 
-# ── 4. Save updated state ─────────────────────────────────────────────────────
+# ─── 4. Save updated state ────────────────────────────────────────────────────
 STATE_FILE.write_text(json.dumps({"stars": sorted(current)}))
 print("Shout-out run complete.")

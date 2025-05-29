@@ -1,19 +1,22 @@
 # .github/workflows/stargazer_shoutouts.yml
-name: GitGrowBot Stargazer Shoutouts (Scheduled)
-# This workflow automatically welcomes new stargazers.
+name: GitGrowBot Stargazer Shoutouts (Manual)
+
 on:
   workflow_dispatch:
 
 permissions:
-  contents:    write   # allow committing updated JSON
-  discussions: write   # allow posting to Discussions
+  contents:    write    # for checkout & pushing state branch
+  discussions: write    # for posting comments
 
 jobs:
   shout:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout main
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -23,17 +26,36 @@ jobs:
       - name: Install dependencies
         run: pip install PyGithub requests
 
-      - name: Run shoutouts
+      - name: Run shoutouts script
         env:
           PAT_TOKEN:             ${{ secrets.PAT_TOKEN }}
           GITHUB_REPOSITORY:     ${{ github.repository }}
           WELCOME_DISCUSSION_ID: ${{ vars.WELCOME_DISCUSSION_ID }}
         run: python scripts/shoutouts.py
 
-      - name: Commit updated state
+      - name: Create/update state branch
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          # create or reset the branch
+          git checkout -B stargazer-state
           git add .github/state/stars.json
-          git diff --cached --quiet || git commit -m "chore: update stargazers state"
-          git push
+          # only commit if changes exist
+          if git diff --cached --quiet; then
+            echo "No state changes to commit."
+          else
+            git commit -m "chore: update stargazers state"
+          fi
+          git push -f origin stargazer-state
+
+      - name: Open or update Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token:           ${{ secrets.PAT_TOKEN }}
+          commit-message:  chore: update stargazers state
+          branch:          stargazer-state
+          title:           chore: update stargazers state
+          body: |
+            This PR updates the star cache so the shoutouts bot can detect unfollows next run.
+          base:            main
+          labels:          automation, stargazer-state

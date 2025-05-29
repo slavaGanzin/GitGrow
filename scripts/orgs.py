@@ -7,9 +7,9 @@ from github import Github, GithubException
 
 def main():
     # — Auth & client setup —
-    token = os.getenv("GITHUB_TOKEN")
+    token = os.getenv("PAT_TOKEN")
     if not token:
-        sys.exit("[FATAL] GITHUB_TOKEN environment variable is required")
+        sys.exit("[FATAL] PAT_TOKEN environment variable is required")
 
     gh = Github(token)
     try:

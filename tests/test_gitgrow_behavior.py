@@ -45,7 +45,7 @@ class DummyGithub:
 @pytest.fixture(autouse=True)
 def fake_github(monkeypatch):
     # fake token + patch Github()
-    monkeypatch.setenv("GITHUB_TOKEN", "fake")
+    monkeypatch.setenv("PAT_TOKEN", "fake")
     me = DummyMe()
     monkeypatch.setattr("github.Github", lambda token: DummyGithub(me))
     return me

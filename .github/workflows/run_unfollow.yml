@@ -30,6 +30,6 @@ jobs:
           pip install PyGithub  # Install PyGithub package
       - name: Run unfollowers
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # GitHub token for authentication
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}  # GitHub token for authentication
           WHITELIST_FILE: config/whitelist.txt  # Path to whitelist file
         run: python scripts/unfollowers.py  # Run the unfollowers script

@@ -5,22 +5,22 @@ from pathlib import Path
 import requests
 from github import Github
 
-# Environment variables
+# ── Environment ────────────────────────────────────────────────────────────────
 WELCOME_DISCUSSION_ID = int(os.environ["WELCOME_DISCUSSION_ID"])
 TOKEN                 = os.environ["PAT_TOKEN"]
 STATE_FILE            = Path(".github/state/stars.json")
 
-# GitHub API setup
+# ── GitHub setup ───────────────────────────────────────────────────────────────
 gh   = Github(TOKEN)
 repo = gh.get_repo(os.environ["GITHUB_REPOSITORY"])
 
-# REST endpoint for posting discussion comments
+# REST URL for posting discussion comments
 COMMENTS_URL = (
     f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}"
     f"/discussions/{WELCOME_DISCUSSION_ID}/comments"
 )
 
-# ---------- 1. Load last run state ----------
+# ── 1. Load last run state ─────────────────────────────────────────────────────
 STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
 if STATE_FILE.exists():
     cache = json.loads(STATE_FILE.read_text())
@@ -28,22 +28,22 @@ if STATE_FILE.exists():
 else:
     seen = set()
 
-# ---------- 2. Fetch current stargazers and diff ----------
+# ── 2. Fetch current stargazers and diff ──────────────────────────────────────
 current   = {u.login.lower() for u in repo.get_stargazers()}
 new_stars = current - seen
-un_stars  = seen    - current
+un_stars  = seen - current
 
-# ---------- 3. Post messages via REST ----------
-def post(msg):
-    response = requests.post(
+# ── 3. Post messages via REST ─────────────────────────────────────────────────
+def post(msg: str):
+    resp = requests.post(
         COMMENTS_URL,
         headers={
             "Authorization": f"token {TOKEN}",
-            "Accept":        "application/vnd.github+json"
+            "Accept":        "application/vnd.github+json",
         },
-        json={"body": msg}
+        json={"body": msg},
     )
-    response.raise_for_status()
+    resp.raise_for_status()
 
 if new_stars:
     msg = (
@@ -69,6 +69,6 @@ if un_stars:
     )
     post(msg)
 
-# ---------- 4. Save updated state ----------
-STATE_FILE.write_text(json.dumps({ "stars": sorted(current) }))
+# ── 4. Save updated state ─────────────────────────────────────────────────────
+STATE_FILE.write_text(json.dumps({"stars": sorted(current)}))
 print("Shout-out run complete.")

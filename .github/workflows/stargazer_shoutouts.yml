@@ -34,7 +34,7 @@ jobs:
         env:
           PAT_TOKEN:             ${{ secrets.PAT_TOKEN }}  # set PAT_TOKEN environment variable
           GITHUB_REPOSITORY:     ${{ github.repository }}  # set GITHUB_REPOSITORY environment variable
-          WELCOME_DISCUSSION_ID: ${{ secrets.WELCOME_DISCUSSION_ID }}  # set WELCOME_DISCUSSION_ID environment variable
+          WELCOME_DISCUSSION_ID: ${{ vars.WELCOME_DISCUSSION_ID }}  # set WELCOME_DISCUSSION_ID repo variable
         run: python scripts/shoutouts.py  # run the shoutouts.py script
 
       - name: Persist updated state

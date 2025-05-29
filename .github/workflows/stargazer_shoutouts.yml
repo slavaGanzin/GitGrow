@@ -1,5 +1,5 @@
 # .github/workflows/stargazer_shoutouts.yml
-name: GitGrowBot Stargazer Shoutouts (Daily)
+name: GitGrowBot Stargazer Shoutouts (Scheduled)
 # Automatically welcome new stargazers in Discussions.
 # Runs daily at 06:15, 12:15 and 18:15 UTC, or manually via the GitHub UI.
 
@@ -28,7 +28,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'  # specify Python version 3.10
-      - run: pip install PyGithub==1.54.1  # install PyGithub package^compatible with get discussion call
+      - run: pip install PyGithub requests  # install PyGithub requests instead of deprecated get_discussion
 
       - name: Run shout-out bot
         env:

@@ -5,8 +5,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents:    write    # for checkout & pushing state branch
-  discussions: write    # for posting comments
+  contents:    write    # checkout + push branches
+  discussions: write    # post comments via GraphQL
 
 jobs:
   shout:
@@ -37,12 +37,10 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # create or reset the branch
           git checkout -B stargazer-state
           git add .github/state/stars.json
-          # only commit if changes exist
           if git diff --cached --quiet; then
-            echo "No state changes to commit."
+            echo "No changes to stars.json, skipping commit"
           else
             git commit -m "chore: update stargazers state"
           fi
@@ -51,13 +49,13 @@ jobs:
       - name: Open or update Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
-          token: ${{ secrets.PAT_TOKEN }}
-          commit-message: chore-update stargazers state
-          branch: stargazer-state
-          title: chore-update stargazers state
+          token:           ${{ secrets.PAT_TOKEN }}
+          commit-message:  "chore: update stargazers state"
+          branch:          stargazer-state
+          title:           "chore: update stargazers state"
           body: |
             This PR updates the star cache so the shoutouts bot can detect unfollows next run.
-          base: main
-          labels: |
-            automation
-            stargazer-state
+          base:            main
+          labels:
+            - automation
+            - stargazer-state

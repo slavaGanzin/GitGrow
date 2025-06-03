@@ -2,6 +2,9 @@
 name: GitGrowBot Stargazer Shoutouts (Manual)
 
 on:
+  # This workflow is triggered manually and can also be run on a schedule.
+  schedule:
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 jobs:
@@ -11,10 +14,15 @@ jobs:
       contents: write # Required to commit and push changes
 
     steps:
-      - name: Checkout tracker-data branch
+      - name: Checkout main/code branch
         uses: actions/checkout@v4
-        with:
-          ref: tracker-data
+        # No ref, defaults to branch that triggered the workflow (main)
+
+      - name: Fetch state file from tracker-data branch
+        run: |
+          git fetch origin tracker-data:tracker-data
+          git checkout tracker-data -- .github/state/stars.json || true
+          git checkout ${{ github.ref_name }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -37,4 +45,5 @@ jobs:
           commit_message: "chore: update stargazers state [bot]"
           branch: tracker-data
           file_pattern: .github/state/stars.json
+
           # The action uses GITHUB_TOKEN by default.

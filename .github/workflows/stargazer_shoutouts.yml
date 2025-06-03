@@ -1,5 +1,5 @@
 # .github/workflows/stargazer_shoutouts.yml
-name: GitGrowBot Stargazer Tracker (Manual Shoutouts)
+name: Stargazer Tracker (Manual shoutouts)
 
 on:
   workflow_dispatch:

@@ -1,33 +1,42 @@
 # .github/workflows/stargazer_shoutouts.yml
-name: Stargazer Tracker (Manual shoutouts)
+name: GitGrowBot Stargazer Shoutouts (Manual)
 
+# Manual trigger configuration - requires manual dispatch via GitHub UI/API
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # Visible in repository's "Actions" tab sidebar
 
 jobs:
   stargazer_shoutouts:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Execute job on latest Ubuntu runner (GitHub-hosted)
+    
     steps:
-      - uses: actions/checkout@v4
+      # Required to checkout repository code
+      - uses: actions/checkout@v4  # Needed to access scripts/shoutouts.py
 
+      # Set up Python environment for script execution
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v5  # Official action with caching
         with:
-          python-version: 3.11
+          python-version: 3.11  # Must match script's runtime requirements
 
-      - name: Install dependencies
-        run: pip install requests
+      # Retrieve previous state file (silently fails if first run)
+      - name: Download stars.json artifact if exists
+        uses: actions/download-artifact@v4
+        with:
+          name: stargazers-state  # Shared between workflow runs
+        continue-on-error: true  # Essential for initial execution
 
+      # Core script that generates shoutouts and updates state
       - name: Run shoutouts.py
-        run: python3 scripts/shoutouts.py
+        run: python3 scripts/shoutouts.py  # Main business logic
         env:
-          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # Requires repo+discussions scope
+          GITHUB_REPOSITORY: ${{ github.repository }}  # Automatic context injection
+          WELCOME_DISCUSSION_ID: 8  # Must match actual discussion ID number
 
-      - name: Upload comment artifacts
-        uses: actions/upload-artifact@v4
+      # Persist new state file for next workflow execution
+      - name: Upload stars.json artifact
+        uses: actions/upload-artifact@v4  # Cross-job artifact sharing
         with:
-          name: stargazer-comments
-          path: |
-            .github/state/welcome_comments.md
-            .github/state/farewell_comments.md
-            .github/state/stars.json
+          name: stargazers-state  # Retained for 90 days by default
+          path: .github/state/stars.json  # Relative to workspace root

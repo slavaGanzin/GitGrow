@@ -4,58 +4,55 @@ name: GitGrowBot Stargazer Shoutouts (Manual)
 on:
   workflow_dispatch:
 
-permissions:
-  contents:    write    # checkout + push branches
-  discussions: write    # post comments via GraphQL
-
 jobs:
-  shout:
+  stargazer_shoutouts:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout main
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Full history needed for branch switching
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: 3.11
+
+      # Fetch state file from stargazer-state branch (fails silently if first run)
+      - name: Checkout state file from stargazer-state branch
+        run: |
+          git fetch origin stargazer-state:stargazer-state
+          git checkout stargazer-state -- .github/state/stars.json || true
+          git checkout ${{ github.ref_name }}
 
       - name: Install dependencies
-        run: pip install PyGithub requests
+        run: pip install requests
 
-      - name: Run shoutouts script
+      - name: Run shoutouts.py
+        run: python3 scripts/shoutouts.py
         env:
-          PAT_TOKEN:             ${{ secrets.PAT_TOKEN }}
-          GITHUB_REPOSITORY:     ${{ github.repository }}
-          WELCOME_DISCUSSION_ID: ${{ vars.WELCOME_DISCUSSION_ID }}
-        run: python scripts/shoutouts.py
+          GITHUB_REPOSITORY: ${{ github.repository }}
 
-      - name: Create/update state branch
+      - name: Commit and push updated stars.json to state branch
         run: |
-          git config user.name  "github-actions[bot]"
+          git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -B stargazer-state
+          git checkout stargazer-state
           git add .github/state/stars.json
           if git diff --cached --quiet; then
             echo "No changes to stars.json, skipping commit"
           else
-            git commit -m "chore: update stargazers state"
+            git commit -m "chore: update stargazers state [bot]"
+            git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}
+            git push origin stargazer-state
           fi
-          git push -f origin stargazer-state
+          git checkout ${{ github.ref_name }}
 
-      - name: Open or update Pull Request
-        uses: peter-evans/create-pull-request@v5
+      - name: Upload comment artifacts
+        uses: actions/upload-artifact@v4
         with:
-          token:           ${{ secrets.PAT_TOKEN }}
-          commit-message:  "chore: update stargazers state"
-          branch:          stargazer-state
-          title:           "chore: update stargazers state"
-          body: |
-            This PR updates the star cache so the shoutouts bot can detect unfollows next run.
-          base:            main
-          labels:
-            - automation
-            - stargazer-state
+          name: stargazer-comments
+          path: |
+            .github/state/welcome_comments.md
+            .github/state/farewell_comments.md
+            .github/state/stars.json

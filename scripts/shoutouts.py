@@ -51,9 +51,9 @@ if new_stars:
         "Welcome aboard and thank you for your interest: "
         + ", ".join(f"@{u}" for u in sorted(new_stars))
         + "\n\n"
-        "You've been added to the active users follow list. Glad to have you here!\n\n"
-        "> *L'amitié naît d'une mutuelle estime et s'entretient moins par les bienfaits que par l'honnêteté.*\n"
-        "> — Étienne de La Boétie"
+        "You've been added to the active users follow list `(usernames.txt)`. Glad to have you here! 😸 \n\n"
+        "> _L'amitié naît d'une mutuelle estime et s'entretient moins par les bienfaits que par l'honnêteté._\n"
+        "> — **Étienne de La Boétie**"
     )
     with open(WELCOME_FILE, "w") as f:
         f.write(welcome_msg)
@@ -66,8 +66,8 @@ if lost_stars:
         + ", ".join(f"@{u}" for u in sorted(lost_stars))
         + " unstarred GitGrowBot.\n\n"
         "Your support was appreciated. We've removed you from the users follow list, but you're welcome back anytime.\n\n"
-        "> *Rien ne se perd, rien ne se crée, tout se transforme.*\n"
-        "> — Antoine Lavoisier"
+        "> _Rien ne se perd, rien ne se crée, tout se transforme._\n"
+        "> — **Antoine Lavoisier**"
     )
     with open(FAREWELL_FILE, "w") as f:
         f.write(farewell_msg)

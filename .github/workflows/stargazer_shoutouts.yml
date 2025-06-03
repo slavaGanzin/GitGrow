@@ -1,42 +1,58 @@
 # .github/workflows/stargazer_shoutouts.yml
 name: GitGrowBot Stargazer Shoutouts (Manual)
 
-# Manual trigger configuration - requires manual dispatch via GitHub UI/API
 on:
-  workflow_dispatch:  # Visible in repository's "Actions" tab sidebar
+  workflow_dispatch:
 
 jobs:
   stargazer_shoutouts:
-    runs-on: ubuntu-latest  # Execute job on latest Ubuntu runner (GitHub-hosted)
+    runs-on: ubuntu-latest
     
     steps:
-      # Required to checkout repository code
-      - uses: actions/checkout@v4  # Needed to access scripts/shoutouts.py
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history needed for branch switching
 
-      # Set up Python environment for script execution
       - name: Set up Python
-        uses: actions/setup-python@v5  # Official action with caching
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.11  # Must match script's runtime requirements
+          python-version: 3.11
 
-      # Retrieve previous state file (silently fails if first run)
-      - name: Download stars.json artifact if exists
-        uses: actions/download-artifact@v4
-        with:
-          name: stargazers-state  # Shared between workflow runs
-        continue-on-error: true  # Essential for initial execution
+      # Fetch state file from stargazer-state branch (fails silently if first run)
+      - name: Checkout state file from stargazer-state branch
+        run: |
+          git fetch origin stargazer-state:stargazer-state
+          git checkout stargazer-state -- .github/state/stars.json || true
+          git checkout ${{ github.ref_name }}
 
-      # Core script that generates shoutouts and updates state
+      - name: Install dependencies
+        run: pip install requests
+
       - name: Run shoutouts.py
-        run: python3 scripts/shoutouts.py  # Main business logic
+        run: python3 scripts/shoutouts.py
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # Requires repo+discussions scope
-          GITHUB_REPOSITORY: ${{ github.repository }}  # Automatic context injection
-          WELCOME_DISCUSSION_ID: 8  # Must match actual discussion ID number
+          GITHUB_REPOSITORY: ${{ github.repository }}
 
-      # Persist new state file for next workflow execution
-      - name: Upload stars.json artifact
-        uses: actions/upload-artifact@v4  # Cross-job artifact sharing
+      - name: Commit and push updated stars.json to state branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout stargazer-state
+          git add .github/state/stars.json
+          if git diff --cached --quiet; then
+            echo "No changes to stars.json, skipping commit"
+          else
+            git commit -m "chore: update stargazers state [bot]"
+            git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}
+            git push origin stargazer-state
+          fi
+          git checkout ${{ github.ref_name }}
+
+      - name: Upload comment artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: stargazers-state  # Retained for 90 days by default
-          path: .github/state/stars.json  # Relative to workspace root
+          name: stargazer-comments
+          path: |
+            .github/state/welcome_comments.md
+            .github/state/farewell_comments.md
+            .github/state/stars.json

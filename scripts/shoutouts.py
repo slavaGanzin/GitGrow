@@ -3,6 +3,7 @@
 import os
 import json
 from pathlib import Path
+import requests
 
 STATE_FILE = Path(".github/state/stars.json")
 OUTPUT_DIR = Path(".github/state")
@@ -10,8 +11,6 @@ WELCOME_FILE = OUTPUT_DIR / "welcome_comments.md"
 FAREWELL_FILE = OUTPUT_DIR / "farewell_comments.md"
 REPO = os.environ["GITHUB_REPOSITORY"]
 HEADERS = {"Accept": "application/vnd.github+json"}
-
-import requests
 
 def get_stargazers():
     stargazers = set()

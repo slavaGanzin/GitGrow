@@ -1,46 +1,33 @@
 # .github/workflows/stargazer_shoutouts.yml
-name: GitGrowBot Stargazer Shoutouts (Manual)
+name: GitGrowBot Stargazer Tracker (Manual Shoutouts)
 
-# Manual trigger configuration - requires manual dispatch via GitHub UI/API
 on:
   workflow_dispatch:
 
 jobs:
   stargazer_shoutouts:
-    runs-on: ubuntu-latest  # Execute job on latest Ubuntu runner
-    
+    runs-on: ubuntu-latest
     steps:
-      # Required to checkout repository code
       - uses: actions/checkout@v4
 
-      # Set up Python environment for script execution
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.11  # Specific Python version match
+          python-version: 3.11
 
-      # Install required Python packages for script execution
       - name: Install dependencies
-        run: pip install PyGithub requests
+        run: pip install requests
 
-      # Retrieve previous state file (silently fails if first run)
-      - name: Download stars.json artifact if exists
-        uses: actions/download-artifact@v4
-        with:
-          name: stargazers-state  # Artifact name from previous runs
-        continue-on-error: true  # Allow missing artifact on first run
-
-      # Core script that generates shoutouts and updates state
       - name: Run shoutouts.py
         run: python3 scripts/shoutouts.py
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # Auth token for API access
-          GITHUB_REPOSITORY: ${{ github.repository }}  # Current repo context
-          WELCOME_DISCUSSION_ID: 8  # Discussion thread ID for posting
+          GITHUB_REPOSITORY: ${{ github.repository }}
 
-      # Persist new state file for next workflow execution
-      - name: Upload stars.json artifact
+      - name: Upload comment artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: stargazers-state  # Artifact name for storage
-          path: .github/state/stars.json  # Path to state file
+          name: stargazer-comments
+          path: |
+            .github/state/welcome_comments.md
+            .github/state/farewell_comments.md
+            .github/state/stars.json

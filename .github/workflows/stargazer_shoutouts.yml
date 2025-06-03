@@ -19,6 +19,10 @@ jobs:
         with:
           python-version: 3.11  # Specific Python version match
 
+      # Install required Python packages for script execution
+      - name: Install dependencies
+        run: pip install PyGithub requests
+
       # Retrieve previous state file (silently fails if first run)
       - name: Download stars.json artifact if exists
         uses: actions/download-artifact@v4

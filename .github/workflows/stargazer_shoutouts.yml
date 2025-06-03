@@ -43,7 +43,7 @@ jobs:
             echo "No changes to stars.json, skipping commit"
           else
             git commit -m "chore: update stargazers state [bot]"
-            git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/ikramagix/GitGrowBot
+            git remote set-url origin https://x-access-token:$PAT_TOKEN@github.com/ikramagix/GitGrowBot
             git push origin tracker-data
           fi
           git checkout ${{ github.ref_name }}

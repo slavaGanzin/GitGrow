@@ -1,5 +1,5 @@
 # .github/workflows/run_orgs.yml (draft)
-name: GitGrowBot Org Refollower (Scheduled every 15 minutes)
+name: GitGrowBot Orgs Targeter (Manual)
 # This workflow runs the GitGrowBot organization follow/refollow script on a schedule.
 # It is triggered every 15 minutes via a cron job and can also be run manually.
 # The script ensures the user follows or refollows target organizations to increase exposure.

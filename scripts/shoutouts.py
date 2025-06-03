@@ -57,7 +57,8 @@ if new_stars:
     with open(WELCOME_FILE, "w") as f:
         f.write(welcome_msg)
 else:
-    WELCOME_FILE.unlink(missing_ok=True)
+    with open(WELCOME_FILE, "w") as f:
+        f.write("No new stargazers detected this run.\n")
 
 if lost_stars:
     farewell_msg = (
@@ -71,8 +72,9 @@ if lost_stars:
     with open(FAREWELL_FILE, "w") as f:
         f.write(farewell_msg)
 else:
-    FAREWELL_FILE.unlink(missing_ok=True)
-
+    with open(FAREWELL_FILE, "w") as f:
+        f.write("No stargazers lost this run.\n")
+        
 # Save new state
 with open(STATE_FILE, "w") as f:
     json.dump(sorted(current_stars), f, indent=2)

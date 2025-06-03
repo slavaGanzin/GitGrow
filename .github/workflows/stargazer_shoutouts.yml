@@ -4,7 +4,7 @@ name: GitGrowBot Stargazer Shoutouts (Manual)
 on:
   # This workflow is triggered manually and can also be run on a schedule.
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '55 11 * * *' # Runs daily at 11:55 UTC
   workflow_dispatch:
 
 jobs:
@@ -46,4 +46,11 @@ jobs:
           branch: tracker-data
           file_pattern: .github/state/stars.json
 
-          # The action uses GITHUB_TOKEN by default.
+      - name: Upload shoutouts artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: stargazer-comments
+          path: |
+            .github/state/welcome_comments.md
+            .github/state/farewell_comments.md
+            .github/state/stars.json

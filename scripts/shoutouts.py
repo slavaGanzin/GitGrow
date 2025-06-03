@@ -47,11 +47,13 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 if new_stars:
     welcome_msg = (
-        "🌟 **New stargazers detected!**\n"
+        "# 🌟 **New stargazers detected!**\n"
         "Welcome aboard and thank you for your interest: "
         + ", ".join(f"@{u}" for u in sorted(new_stars))
         + "\n\n"
-        "You’ve been added to the active users follow list. Glad to have you here!"
+        "You've been added to the active users follow list. Glad to have you here!\n\n"
+        "> *L'amitié naît d'une mutuelle estime et s'entretient moins par les bienfaits que par l'honnêteté.*\n"
+        "> — Étienne de La Boétie"
     )
     with open(WELCOME_FILE, "w") as f:
         f.write(welcome_msg)
@@ -60,10 +62,12 @@ else:
 
 if lost_stars:
     farewell_msg = (
-        "💔 **Oh no, stars fading away...**\n"
+        "# 💔 **Oh no, stars fading away...**\n"
         + ", ".join(f"@{u}" for u in sorted(lost_stars))
         + " unstarred GitGrowBot.\n\n"
-        "Your support was appreciated—we've removed you from the users follow list, but you're always welcome back."
+        "Your support was appreciated. We've removed you from the users follow list, but you're welcome back anytime.\n\n"
+        "> *Rien ne se perd, rien ne se crée, tout se transforme.*\n"
+        "> — Antoine Lavoisier"
     )
     with open(FAREWELL_FILE, "w") as f:
         f.write(farewell_msg)

@@ -47,12 +47,11 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 if new_stars:
     welcome_msg = (
-        "🎉 **A sky full of new stars!** 🌟 Welcome aboard: "
+        "🌟 **New stargazers detected!**\n"
+        "Welcome aboard and thank you for your interest: "
         + ", ".join(f"@{u}" for u in sorted(new_stars))
         + "\n\n"
-        "> _'Cause you're a sky, you're a sky full of stars_\n"
-        "> _I'm gonna give you my heart..._\n\n"
-        "You've been added to `usernames.txt`. Glad to have you here!"
+        "You’ve been added to the active users follow list. Glad to have you here!"
     )
     with open(WELCOME_FILE, "w") as f:
         f.write(welcome_msg)
@@ -61,14 +60,10 @@ else:
 
 if lost_stars:
     farewell_msg = (
-        "👋 **Oh no, stars fading away...** We'll miss you: "
+        "💔 **Oh no, stars fading away...**\n"
         + ", ".join(f"@{u}" for u in sorted(lost_stars))
-        + "\n\n"
-        "> _I don't care, go on and tear me apart_\n"
-        "> _I don't care if you do_\n"
-        "> _'Cause in a sky, 'cause in a sky full of stars_\n"
-        "> _I think I saw you..._\n\n"
-        "We've removed you from the list, but you're always welcome back!"
+        + " unstarred GitGrowBot.\n\n"
+        "Your support was appreciated—we've removed you from the users follow list, but you're always welcome back."
     )
     with open(FAREWELL_FILE, "w") as f:
         f.write(farewell_msg)

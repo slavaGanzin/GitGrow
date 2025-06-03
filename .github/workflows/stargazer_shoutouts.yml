@@ -7,45 +7,34 @@ on:
 jobs:
   stargazer_shoutouts:
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: write # Required to commit and push changes
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout tracker-data branch
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history needed for branch switching
+          ref: tracker-data
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: 3.11
 
-      # Fetch state file from tracker-data branch (fails silently if first run)
-      - name: Checkout state file from tracker-data branch
-        run: |
-          git fetch origin tracker-data:tracker-data
-          git checkout tracker-data -- .github/state/stars.json || true
-          git checkout ${{ github.ref_name }}
-
       - name: Install dependencies
-        run: pip install requests
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
 
       - name: Run shoutouts.py
         run: python3 scripts/shoutouts.py
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
 
-      - name: Commit and push updated stars.json to state branch
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout tracker-data
-          git add .github/state/stars.json
-          if git diff --cached --quiet; then
-            echo "No changes to stars.json, skipping commit"
-          else
-            git commit -m "chore: update stargazers state [bot]"
-            git remote set-url origin https://x-access-token:$PAT_TOKEN@github.com/ikramagix/GitGrowBot
-            git push origin tracker-data
-          fi
-          git checkout ${{ github.ref_name }}
-        env:
-          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+      - name: Commit and push updated stars.json to tracker-data
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update stargazers state [bot]"
+          branch: tracker-data
+          file_pattern: .github/state/stars.json
+          # The action uses GITHUB_TOKEN by default.

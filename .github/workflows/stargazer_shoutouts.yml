@@ -1,39 +1,42 @@
 # .github/workflows/stargazer_shoutouts.yml
-name: GitGrowBot Stargazer Shoutouts (Scheduled)
-# This workflow automatically welcomes new stargazers.
+name: GitGrowBot Stargazer Shoutouts (Manual)
+
+# Manual trigger configuration - requires manual dispatch via GitHub UI/API
 on:
   workflow_dispatch:
 
-permissions:
-  contents:    write   # allow committing updated JSON
-  discussions: write   # allow posting to Discussions
-
 jobs:
-  shout:
-    runs-on: ubuntu-latest
-
+  stargazer_shoutouts:
+    runs-on: ubuntu-latest  # Execute job on latest Ubuntu runner
+    
     steps:
-      - uses: actions/checkout@v3
+      # Required to checkout repository code
+      - uses: actions/checkout@v4
 
+      # Set up Python environment for script execution
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: 3.11  # Specific Python version match
 
-      - name: Install dependencies
-        run: pip install PyGithub requests
+      # Retrieve previous state file (silently fails if first run)
+      - name: Download stars.json artifact if exists
+        uses: actions/download-artifact@v4
+        with:
+          name: stargazers-state  # Artifact name from previous runs
+        continue-on-error: true  # Allow missing artifact on first run
 
-      - name: Run shoutouts
+      # Core script that generates shoutouts and updates state
+      - name: Run shoutouts.py
+        run: python3 scripts/shoutouts.py
         env:
-          PAT_TOKEN:             ${{ secrets.PAT_TOKEN }}
-          GITHUB_REPOSITORY:     ${{ github.repository }}
-          WELCOME_DISCUSSION_ID: ${{ vars.WELCOME_DISCUSSION_ID }}
-        run: python scripts/shoutouts.py
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # Auth token for API access
+          GITHUB_REPOSITORY: ${{ github.repository }}  # Current repo context
+          WELCOME_DISCUSSION_ID: 8  # Discussion thread ID for posting
 
-      - name: Commit updated state
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .github/state/stars.json
-          git diff --cached --quiet || git commit -m "chore: update stargazers state"
-          git push
+      # Persist new state file for next workflow execution
+      - name: Upload stars.json artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stargazers-state  # Artifact name for storage
+          path: .github/state/stars.json  # Path to state file

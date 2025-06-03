@@ -1,73 +1,80 @@
 #!/usr/bin/env python3
-import os, json
+
+import os
+import json
 from pathlib import Path
-import requests
 from github import Github
+import requests
 
-# ─── Config ───────────────────────────────────────────────────────────────────
-DISCUSSION_ID = os.environ["WELCOME_DISCUSSION_ID"]
-TOKEN         = os.environ["PAT_TOKEN"]
-REPO          = os.environ["GITHUB_REPOSITORY"]
-STATE_FILE    = Path(".github/state/stars.json")
+# Configuration from environment variables
+DISCUSSION_NUMBER = int(os.environ["WELCOME_DISCUSSION_ID"])  # Discussion forum ID
+TOKEN = os.environ["GITHUB_TOKEN"]  # Personal Access Token for API access
+REPO = os.environ["GITHUB_REPOSITORY"]  # Current repository in 'owner/repo' format
+STATE_FILE = Path(".github/state/stars.json")  # Persistence file path
+HEADERS = {"Authorization": f"token {TOKEN}"}  # API request headers
 
-# ─── GitHub setup & REST endpoint ─────────────────────────────────────────────
-gh   = Github(TOKEN)
-repo = gh.get_repo(REPO)
-COMMENTS_URL = (
-    f"https://api.github.com/repos/{REPO}"
-    f"/discussions/{DISCUSSION_ID}/comments"
-)
-
-# ─── 1. Load previous state ────────────────────────────────────────────────────
-STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+# 1. Load previous state from JSON file
 if STATE_FILE.exists():
-    seen = set(json.loads(STATE_FILE.read_text())["stars"])
+    with open(STATE_FILE, "r") as f:
+        previous_stars = set(json.load(f))  # Load as set for easy diffing
 else:
-    seen = set()
+    previous_stars = set()  # Initialize empty set for first run
 
-# ─── 2. Get current stargazers & diff ─────────────────────────────────────────
-current   = {u.login.lower() for u in repo.get_stargazers()}
-new_stars = current - seen
-un_stars  = seen    - current
+# 2. Fetch current stargazers (paginated)
+def get_stargazers():
+    stargazers = set()
+    page = 1
+    while True:
+        # Paginated API request (GitHub returns 100 results/page max)
+        url = f"https://api.github.com/repos/{REPO}/stargazers?per_page=100&page={page}"
+        resp = requests.get(url, headers=HEADERS)
+        data = resp.json()
+        
+        # Break loop if empty response or unexpected data format
+        if not data or "login" not in str(data):
+            break
+            
+        stargazers |= {user["login"] for user in data}  # Add logins to set
+        
+        # Exit loop if fewer than 100 results (no more pages)
+        if len(data) < 100:
+            break
+        page += 1
+    return stargazers
 
-# ─── 3. Post messages via REST ────────────────────────────────────────────────
-def post(body: str):
-    resp = requests.post(
-        COMMENTS_URL,
-        headers={
-            "Authorization": f"token {TOKEN}",
-            "Accept":        "application/vnd.github.v3+json"
-        },
-        json={"body": body},
-    )
-    resp.raise_for_status()
+current_stars = get_stargazers()
 
-# Welcome new stargazers
+# 3. Detect changes using set operations
+new_stars = current_stars - previous_stars  # Users who starred since last run
+lost_stars = previous_stars - current_stars  # Users who removed their star
+
+# 4. Post comments (REST API)
+def post_discussion_comment(body):
+    """Post formatted message to GitHub discussion thread"""
+    url = f"https://api.github.com/repos/{REPO}/discussions/{DISCUSSION_NUMBER}/comments"
+    resp = requests.post(url, headers=HEADERS, json={"body": body})
+    resp.raise_for_status()  # Raise exception for HTTP errors
+
+# Generate and post welcome message for new stargazers
 if new_stars:
-    msg = (
-        "🎉 **A sky full of new stars!** 🌟 Welcome aboard: "
-        + ", ".join(f"@{u}" for u in sorted(new_stars))
-        + "\n\n"
-        "> _'Cause you're a sky, you're a sky full of stars_\n"
-        "> _I'm gonna give you my heart..._\n\n"
-        "You've been added to `usernames.txt`. Glad to have you here!"
+    body = (
+        "✨ **New stargazer(s):**\n"
+        + "\n".join(f"- @{u}" for u in sorted(new_stars))
+        + "\nWelcome aboard!"
     )
-    post(msg)
+    post_discussion_comment(body)
 
-# Farewell unstargazers
-if un_stars:
-    msg = (
-        "👋 **Oh no, stars fading away...** We'll miss you: "
-        + ", ".join(f"@{u}" for u in sorted(un_stars))
-        + "\n\n"
-        "> _I don't care, go on and tear me apart_\n"
-        "> _I don't care if you do_\n"
-        "> _'Cause in a sky, 'cause in a sky full of stars_\n"
-        "> _I think I saw you..._\n\n"
-        "We've removed you from the list, but you're always welcome back!"
+# Generate and post farewell message for lost stargazers
+
+if lost_stars:
+    body = (
+        "👋 **Departed stargazer(s):**\n"
+        + "\n".join(f"- @{u}" for u in sorted(lost_stars))
+        + "\nSad to see you go."
     )
-    post(msg)
+    post_discussion_comment(body)
 
-# ─── 4. Save updated state ────────────────────────────────────────────────────
-STATE_FILE.write_text(json.dumps({"stars": sorted(current)}))
-print("Shout-out run complete.")
+# 5. Save new state persistently
+STATE_FILE.parent.mkdir(parents=True, exist_ok=True)  # Create state directory if missing
+with open(STATE_FILE, "w") as f:
+    json.dump(sorted(current_stars), f, indent=2)  # Save sorted list for readability

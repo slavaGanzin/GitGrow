@@ -18,11 +18,11 @@ jobs:
         with:
           python-version: 3.11
 
-      # Fetch state file from stargazer-state branch (fails silently if first run)
-      - name: Checkout state file from stargazer-state branch
+      # Fetch state file from tracker-data branch (fails silently if first run)
+      - name: Checkout state file from tracker-data branch
         run: |
-          git fetch origin stargazer-state:stargazer-state
-          git checkout stargazer-state -- .github/state/stars.json || true
+          git fetch origin tracker-data:tracker-data
+          git checkout tracker-data -- .github/state/stars.json || true
           git checkout ${{ github.ref_name }}
 
       - name: Install dependencies
@@ -37,22 +37,15 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout stargazer-state
+          git checkout tracker-data
           git add .github/state/stars.json
           if git diff --cached --quiet; then
             echo "No changes to stars.json, skipping commit"
           else
             git commit -m "chore: update stargazers state [bot]"
-            git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}
-            git push origin stargazer-state
+            git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/ikramagix/GitGrowBot
+            git push origin tracker-data
           fi
           git checkout ${{ github.ref_name }}
-
-      - name: Upload comment artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: stargazer-comments
-          path: |
-            .github/state/welcome_comments.md
-            .github/state/farewell_comments.md
-            .github/state/stars.json
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}

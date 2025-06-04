@@ -66,7 +66,7 @@ def main():
                 print(f"[PRIVATE] {login} inaccessible: {e}")
             continue
 
-        # — activity filter (last 30 days) —
+        # — activity filter (last 3 days) —
         try:
             events = user.get_events()
             last_event = next(iter(events), None)  # PaginatedList to iterator

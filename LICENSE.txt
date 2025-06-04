@@ -1,4 +1,4 @@
-Fair2Share Reciprocity License 1.0
+Fair2Share License 1.0
 
 © 2025 Ikrame Saadi (@ikramagix) and Nikolaï Korolkov (@gr33kurious)
 
@@ -8,7 +8,7 @@ Source code: https://github.com/ikramagix/GitGrowBot/
    You may copy, study, modify, and share this Software free of
    charge for any Non-commercial purpose (defined below).  All
    Commercial use requires a separate licence agreement with the
-   copyright holders.  No automatic commercial “trial period” is
+   copyright holders. No automatic commercial "trial period" is
    granted.
 
 2. Agreement
@@ -21,28 +21,34 @@ Source code: https://github.com/ikramagix/GitGrowBot/
    Licence in every copy or substantial portion of the Software,
    with or without changes.
 
-4. Non-commercial Scope
-   4.1  Personal Uses: research, study, hobby, private
-        entertainment, testing, or religious observance without
+4. Non-commercial scope
+   4.1  Personal uses: research, study, hobby, private
+        entertainment, testing, or observance without
         anticipated commercial application are Non-commercial.
-   4.2  Qualifying Organisations: use by any charitable
+   4.2  Qualifying organisations: use by any charitable
         organisation, educational institution, public-research
         body, public-safety or health organisation, environmental
         protection group, or government institution is
         Non-commercial, regardless of funding source or grant
         obligations.
 
-5. Commercial Use
+5. Commercial use
    Any other purpose is Commercial.
    Contact us to negotiate a paid or 
    revenue-share licence: hello@ikramagix.com
 
-6. Contributions Back
-   Feedback, changes, or additions you contribute under a
-   standard permissive licence (MIT, BSD-2-Clause, Apache-2.0,
-   BlueOak-1.0, etc.) do not count as Commercial use.
+6. Contributions back
+   Feedback, changes, or additions you contribute must be:
+   6.1 Licensed under a standard permissive licence (MIT, BSD-2-Clause,
+       Apache-2.0, BlueOak-1.0, etc.) that does not prohibit the terms
+       of this Fair2Share License.
+   6.2 Accompanied by all required copyright notices and disclaimers.
+   6.3 Compatible with this License's reciprocity requirements
+   Contributions not meeting these requirements will be automatically
+   licensed under Fair2Share terms while preserving their original 
+   copyright ownership.
 
-7. Patent Grant
+7. Patent grant
    Each contributor grants a non-exclusive, worldwide,
    royalty-free patent licence to make, use, sell, and distribute
    their contributions under this Licence.
@@ -55,10 +61,15 @@ Source code: https://github.com/ikramagix/GitGrowBot/
    The contributors cannot revoke this Licence as long as you
    comply with its terms.
 
-10. Excuse
-    If you violate Section 3 (Notices) unknowingly, you are
-    excused provided you fix the problem within thirty (30) days
-    of learning of it.
+10. Immediate termination
+    10.1 Automatic for ANY modified/circumvented license copy
+    10.2 Automatic for ANY missing copyright/SECTION 3 notices
+    10.3 Automatic for ANY commercial use without authorization
+    
+    Commercial use violations under Section 5:
+    - Automatically void all rights immediately
+    - Require retroactive licensing fees
+    - No cure period available
 
 11. No Warranty - No Liability
     THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY
@@ -66,9 +77,3 @@ Source code: https://github.com/ikramagix/GitGrowBot/
     DAMAGES, OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT, OR
     OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE
     SOFTWARE OR THE USE OF THE SOFTWARE.
-
-────────────────────────────────────────────────────────────────
-Usernames in the SAY_THANK_YOU_WHITELIST set must remain on all 
-local whitelist files.
-Please keep contributors connected as a gesture of thanks! ツ
-────────────────────────────────────────────────────────────────

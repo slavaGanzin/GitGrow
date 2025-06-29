@@ -46,22 +46,21 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           BOT_USER: ${{ vars.BOT_USER }}
 
-      - name: Move autostar logs to state folder
-        run: |
-          mkdir -p .github/state/
-          cp scripts/logs/stargazers_*.json .github/state/ || true
+      # This step is no longer necessary unless you also create logs as stargazers_*.json files.
+      # - name: Move autostar logs to state folder
+      #   run: |
+      #     mkdir -p .github/state/
+      #     cp scripts/logs/stargazers_*.json .github/state/ || true
 
-      - name: Commit and push stargazer logs to tracker-data
+      - name: Commit and push stargazer state to tracker-data
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: log stargazer reciprocity results [bot]"
           branch: tracker-data
-          file_pattern: |
-            .github/state/stargazer_state.json
-            .github/state/stargazers_*.json
+          file_pattern: .github/state/stargazer_state.json
 
-      - name: Upload stargazer logs as artifact
+      - name: Upload stargazer state as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: stargazer-logs
-          path: .github/state/stargazers_*.json
+          name: stargazer-state
+          path: .github/state/stargazer_state.json

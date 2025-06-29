@@ -1,5 +1,5 @@
 # .github/workflows/run_orgs.yml (draft)
-name: GitGrowBot Orgs Targeter [DEPRECATED]
+name: Org Targeter [DEPRECATED]
 # DEPRECATION NOTICE: This automation yielded minimal engagement returns
 # Original purpose: Mass-follow target organizations to boost visibility
 # Retired because:

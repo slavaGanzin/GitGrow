@@ -2,7 +2,7 @@
 name: GitGrowBot Follower (Scheduled)
 # This workflow is used to run the GitGrowBot follow bot on a schedule.
 # It is triggered every hour at minute 5, and can also be run manually.
-# The follow bot processes a random number of new follows (5–55) each run.
+# The follow bot processes a random number of new follows (5–155) each run.
 # The unfollow bot runs separately on its own schedule.
 
 on:
@@ -32,7 +32,7 @@ jobs:
 
       - name: Generate random follow batch size
         run: |
-          BATCH_SIZE=$(shuf -i 5-55 -n1)
+          BATCH_SIZE=$(shuf -i 5-155 -n1)
           echo "FOLLOWERS_PER_RUN=$BATCH_SIZE" >> $GITHUB_ENV
           echo "Generated FOLLOWERS_PER_RUN=$BATCH_SIZE"
 

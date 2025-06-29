@@ -1,0 +1,63 @@
+# .github/workflows/autostar.yml
+name: GitGrowBot AutoStar (Scheduled)
+# This workflow is used to run the GitGrowBot autostar bot on a schedule.
+# It is triggered every hour at minute 5, and can also be run manually.
+# The autostar bot processes stargazers and logs reciprocity results.
+# It fetches state from the tracker-data branch and commits results back there.
+# It also uploads the stargazer logs as an artifact.
+
+on:
+  schedule:
+    - cron: '5 */1 * * *'
+  workflow_dispatch: {}  # Allows manual triggering of the workflow
+
+jobs:
+  autostar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Needed for git-auto-commit-action
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Fetch state from tracker-data branch
+        run: |
+          git fetch origin tracker-data:tracker-data
+          mkdir -p .github/state/
+          git checkout tracker-data -- .github/state/ || true
+          git checkout ${{ github.ref_name }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run autostar.py
+        run: python3 scripts/autostar.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          BOT_USER: ${{ vars.BOT_USER }}
+
+      - name: Move autostar logs to state folder
+        run: |
+          mkdir -p .github/state/
+          cp scripts/logs/stargazers_*.json .github/state/ || true
+
+      - name: Commit and push stargazer logs to tracker-data
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: log stargazer reciprocity results [bot]"
+          branch: tracker-data
+          file_pattern: .github/state/stargazers_*.json
+
+      - name: Upload stargazer logs as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stargazer-logs
+          path: .github/state/stargazers_*.json

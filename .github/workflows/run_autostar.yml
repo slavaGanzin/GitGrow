@@ -8,25 +8,27 @@ name: GitGrowBot AutoStar (Scheduled)
 
 on:
   schedule:
-    - cron: '5 */1 * * *'
-  workflow_dispatch: {}  # Allows manual triggering of the workflow
+    - cron: '20 */1 * * *'
+  workflow_dispatch:
 
 jobs:
   autostar:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Needed for git-auto-commit-action
+      contents: write
 
     steps:
-      - name: Checkout code
+      - name: Checkout main (code/scripts)
         uses: actions/checkout@v4
+        with:
+          ref: main
 
-      - name: Fetch state from tracker-data branch
+      - name: Fetch state from tracker-data
         run: |
           git fetch origin tracker-data:tracker-data
           mkdir -p .github/state/
           git checkout tracker-data -- .github/state/ || true
-          git checkout ${{ github.ref_name }}
+          git checkout main
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -38,7 +40,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run autostar.py
+      - name: Run autostar.py (auto-runs autotrack.py if needed)
         run: python3 scripts/autostar.py
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
@@ -54,7 +56,9 @@ jobs:
         with:
           commit_message: "chore: log stargazer reciprocity results [bot]"
           branch: tracker-data
-          file_pattern: .github/state/stargazers_*.json
+          file_pattern: |
+            .github/state/stargazer_state.json
+            .github/state/stargazers_*.json
 
       - name: Upload stargazer logs as artifact
         uses: actions/upload-artifact@v4

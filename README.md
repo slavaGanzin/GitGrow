@@ -2,15 +2,15 @@
 [![GitGrowBot Unfollower (Scheduled)](https://github.com/ikramagix/GitGrowBot/actions/workflows/run_unfollow.yml/badge.svg)](https://github.com/ikramagix/GitGrowBot/actions/workflows/run_unfollow.yml)
 [![GitGrowBot Stargazer Shoutouts (Manual)](https://github.com/ikramagix/GitGrowBot/actions/workflows/stargazer_shoutouts.yml/badge.svg)](https://github.com/ikramagix/GitGrowBot/actions/workflows/stargazer_shoutouts.yml)
 
-# GitGrowBot 
+# GitGrowBot
 
 GitGrowBot is your personal GitHub networking assistant. It's an automation tool designed to help you **grow** and **nurture** your developer network organically. With GitGrowBot, you’ll:
 
 * **Follow** users from our curated list, up to a configurable limit per run.
 * **Unfollow** anyone who doesn’t follow you back, because **reciprocity** matters.
-* (COMING SOON) **Star** and **unstar** repositories with the same give-and-take logic.
+* **Star** and **unstar** repositories with the same give-and-take logic.
 
-All actions run on a schedule (or on demand) in GitHub Actions, so you never need to manually review your follow list. 
+All actions run on a schedule (or on demand) in GitHub Actions, so you never need to manually review your follow list. Just set it up, sit back, and let GitGrowBot handle your networking while you focus on coding.
 
 - 🤔 [How it works](#how-it-works)
 - ❔[Features](#features)
@@ -23,13 +23,12 @@ All actions run on a schedule (or on demand) in GitHub Actions, so you never nee
 - 🤝 [Contributing](#contributing)
 
 ## How it works
+
 The motto **“You only get what you give”** drives GitGrowBot’s behavior:
 
-1. GitGrowBot **follow** someone for you—chances are, they’ll notice and **follow you back** (especially if they’re clever like you and use GitGrowBot too!).  
+1. GitGrowBot **follow** someone for you—chances are, they’ll notice and **follow you back** (especially if they use GitGrowBot too!).  
 2. If they **don’t** reciprocate by the next run, GitGrowBot quietly **unfollows** them.
-3. Soon, we’ll extend this to **stars**: you star their repo, they star yours; you unstar, GitGrowBot unstars theirs.
-
-This ensures your follow list stays active while you're busy coding.
+3. You star their repo, they star yours; you unstar, GitGrowBot unstars theirs.
 
 ## Features
 
@@ -51,6 +50,8 @@ This ensures your follow list stays active while you're busy coding.
   - `scripts/cleaner.py` for list maintenance. 
   - `scripts/integrity.py` for users existence check.
   - `scripts/orgs.py` for optional org member targeting (deprecated, see [CHANGELOG.md](./CHANGELOG.md))
+  - `scripts/autotrack.py` tracks all unique stargazers across your repos, logs "unstargazers," and updates `.github/state/stargazer_state.json` (persisted to the `tracker-data` branch).
+  - `scripts/autostar.py` automatically stars back new stargazers (with action limits for rate safety), unstars users who unstar you, and skips users with excessive public repos.
 
 - **Prebuilt Workflow**  
   - `.github/workflows/run_follow.yml`: Runs **every hour at minute 5** (UTC) by default.
@@ -58,25 +59,32 @@ This ensures your follow list stays active while you're busy coding.
   - `.github/workflows/manual_follow.yml` – manual trigger: **follow & follow-back only**  
   - `.github/workflows/manual_unfollow.yml` – manual trigger: **unfollow non-reciprocals only**
   - `.github/workflows/run_orgs.yml`: (Optional but deprecated, see [CHANGELOG.md](./CHANGELOG.md) for notes on its usage and status.)
-- **Stargazer Change Tracking and Artifacts**
-  - New and lost stargazers are detected using a persistent `.github/state/stars.json` file (stored on a dedicated `tracker-data` branch).
-  - The workflow generates Markdown summaries (`welcome_comments.md`, `farewell_comments.md`) and updates the state file as downloadable artifacts for each run.
-  - No-ops (runs with no changes) are logged for traceability and debugging.
+  - `.github/workflows/autostar.yml`: Tracks new/lost stargazers, automatically stars back new stargazers (with rate limiting), and syncs `.github/state/stargazer_state.json` to the `tracker-data` branch.
+
+- **Change Tracking & Artifacts**
+  - New and lost stargazers are detected using a persistent `.github/state/stargazer_state.json` file, which is automatically updated and committed to the dedicated `tracker-data` branch.
+  - This `tracker-data` branch must exist for full functionality; it is used exclusively for storing state files, so main code and workflow changes remain isolated from tracking data.
+  - Artifacts generated for each run (such as the latest stargazer state file) are available for download directly from the Actions tab.
+  - All state management (reciprocity, lost stargazers, starred users, etc.) is decoupled from the main codebase by using this separate branch.
   
 ## Getting started
 
+GitGrowBot is designed to be easy to set up and use. Here’s how you can get started:
+
 1. **Fork** or **clone** this repo.
-2. In **Settings → Secrets → Actions**, add your Github PAT as `PAT_TOKEN` (scope: `user:follow`).
+2. In **Settings → Secrets → Actions**, add your Github PAT as `PAT_TOKEN` (scope: `user:follow`, `public_repo` for starring).
 3. In **Settings → Variables → Repository variables**, add **`BOT_USER`** with _your_ GitHub username. *This prevents the workflow from running in other people’s forks unless they set their own name.*
 4. **91,000+ members like you who want to grow are waiting for you in** `config/usernames.txt`.  
 You can join this list too—see below (**⭐ & Join more than 91,000 users!**).
 5. (Optional) Tweak the schedules in your workflow files:
     - `.github/workflows/run_follow.yml` runs **hourly at minute 5** by default.
     - `.github/workflows/run_unfollow.yml` runs **every 10 hours at minute 5** (UTC) by default.
+    - `.github/workflows/run_autostar.yml` runs **hourly at minute 20** by default, handling stargazer reciprocity and state management.
 6. (Important) Edit `config/whitelist.txt` to protect any accounts you never want the script to act on (no unfollowing, no unstarring for usernames in `whitelist.txt`).
 7. (Optional) Copy `.env.example` → `.env` for local testing (or contributors).
 8. **Enable** GitHub Actions in your repo settings.
-9. Sit back and code—**GitGrowBot** does the networking for you!  
+9. (One-time setup) Manually create the `tracker-data` branch in your repository. This branch is used to store and version the persistent stargazer state files (`.github/state/stargazer_state.json`) required for full stargazer reciprocity and tracking.
+10. Sit back and code—**GitGrowBot** does the networking (and starring) for you!
 
 ## Local testing
 
@@ -118,32 +126,35 @@ Let's grow! 💪
 ```
 ├── .gitattributes
 ├── .github
-│   └── workflows
-│       ├── run_follow.yml         # Scheduled: follow-only (hourly @ :05)
-│       ├── run_unfollow.yml       # Scheduled: unfollow-only (daily every 10 hours @ :05 UTC)
-│       ├── run_orgs.yml           # (Deprecated, optional) targets famous organizations for exposure
-│       ├── manual_follow.yml      # workflow_dispatch → follow only
-│       ├── manual_unfollow.yml    # workflow_dispatch → unfollow only
-│       └── stargazer_shoutouts.yml # scheduled/manual stargazer state/comment artifacts
+│ └── workflows
+│ ├── run_follow.yml # Scheduled: follow-only (hourly @ :05)
+│ ├── run_unfollow.yml # Scheduled: unfollow-only (daily every 10 hours @ :05 UTC)
+│ ├── autostar.yml # scheduled/manual: stargazer reciprocity (tracks, stars/un-stars on tracker-data branch)
+│ ├── run_orgs.yml # (Deprecated, optional) targets famous organizations for exposure
+│ ├── manual_follow.yml # workflow_dispatch → follow only
+│ ├── manual_unfollow.yml # workflow_dispatch → unfollow only
+│ └── stargazer_shoutouts.yml # keep it deactivated - its purpose is to generate stargazer shoutouts
 ├── .gitignore
 ├── README.md
 ├── config
-│   ├── usernames.txt              # 91,000+ community members (deduped, activity filtered)
-│   ├── organizations.txt          # (Optional) org members, only relevant if using run_orgs.yml
-│   └── whitelist.txt              # accounts to always skip
-├── logs                           # CI artifacts (gitignored)
-│   └── offline_usernames-*.txt
+│ ├── usernames.txt # 91,000+ community members (deduped, activity filtered)
+│ ├── organizations.txt # (Optional) org members, only relevant if using run_orgs.yml
+│ └── whitelist.txt # accounts to always skip
+├── logs # CI artifacts (gitignored)
+│ └── offline_usernames-*.txt
 ├── requirements.txt
 └── scripts
-    ├── gitgrow.py                 # Main follow/unfollow driver
-    ├── unfollowers.py             # Unfollow-only logic
-    ├── cleaner.py                 # Username list maintenance
-    ├── integrity.py               # Username existence check and cleaning
-    └── orgs.py                    # (Deprecated) org follow extension
+├── gitgrow.py # Main follow/unfollow driver
+├── unfollowers.py # Unfollow-only logic
+├── cleaner.py # Username list maintenance
+├── integrity.py # Username existence check and cleaning
+├── autostar.py # Stargazer reciprocity logic: stars/un-stars
+├── autotrack.py # Stargazer tracker/state generator (called by autostar.py)
+└── orgs.py # (Deprecated) org follow extension
 ├── tests/
-│   ├── test_bot_core_behavior.py  # follow/unfollow/follow-back
-│   ├── test_unfollowers.py        # unfollow-only logic
-│   └── test_cleaner.py            # cleaner dedupe + missing-user removal
+│ ├── test_bot_core_behavior.py # follow/unfollow/follow-back
+│ ├── test_unfollowers.py # unfollow-only logic
+│ └── test_cleaner.py # cleaner dedupe + missing-user removal
 ```
 
 ### Manual Troubleshooting Runners (optional)
@@ -165,6 +176,7 @@ Feel free to:
 1. **Open an issue** to suggest new features, report bugs, or share ideas.
 2. **Submit a pull request** to add enhancements, fix problems, or improve documentation.
 3. Join the discussion—your use cases, feedback, and code all keep our community vibrant.
+4. **Star** the repository to show your support and help others discover it.
 
 Every contribution, big or small, helps everyone grow. Thank you for pitching in!
 

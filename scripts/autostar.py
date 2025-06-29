@@ -13,6 +13,8 @@ TOKEN = os.getenv("GITHUB_TOKEN")
 STATE_PATH = Path(".github/state/stargazer_state.json")
 USERNAMES_PATH = Path("config/usernames.txt")
 GROWTH_SAMPLE = 5
+RECIPROCITY_LIMIT = 5   # Limit for reciprocal (stargazer) starring per run
+MAX_REPOS_PER_USER = 50 # Safeguard: if user has >50 repos, skip
 
 def main():
     print("=== GitGrowBot autostar.py started ===")
@@ -51,15 +53,20 @@ def main():
     unstargazers = set(state.get("unstargazers", []))
     print(f"Loaded {len(current_stargazers)} stargazers, {len(starred_users)} starred_users, {len(unstargazers)} unstargazers.")
 
-    # 1. Star new stargazers
+    # 1. Star new stargazers (reciprocity, but only up to limit)
     print(f"== Star new stargazers: {len(current_stargazers)} to check ==")
     new_to_star = [u for u in current_stargazers if u not in starred_users]
-    print(f"Found {len(new_to_star)} new users to star.")
+    print(f"Found {len(new_to_star)} new users to star. Limiting to {RECIPROCITY_LIMIT} per run.")
+    new_to_star = new_to_star[:RECIPROCITY_LIMIT]  # Limit per run
+
     for i, user in enumerate(new_to_star):
         print(f"  [{i+1}/{len(new_to_star)}] Processing user: {user}")
         try:
             u = gh.get_user(user)
             repos = [r for r in u.get_repos() if not r.fork and not r.private]
+            if len(repos) > MAX_REPOS_PER_USER:
+                print(f"    SKIP: {user} has {len(repos)} public repos (> {MAX_REPOS_PER_USER}), skipping for rate limit safety.")
+                continue
             print(f"    Found {len(repos)} public non-fork repos for {user}")
             if not repos:
                 print(f"    No public repos to star for {user}, skipping.")
@@ -103,6 +110,9 @@ def main():
             try:
                 u = gh.get_user(user)
                 repos = [r for r in u.get_repos() if not r.fork and not r.private]
+                if len(repos) > MAX_REPOS_PER_USER:
+                    print(f"    SKIP: {user} has {len(repos)} public repos (> {MAX_REPOS_PER_USER}), skipping for rate limit safety.")
+                    continue
                 print(f"    Found {len(repos)} public non-fork repos for {user}")
                 if not repos:
                     print(f"    No public repos to star for {user}, skipping.")

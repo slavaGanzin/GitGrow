@@ -16,7 +16,7 @@ All actions run on a schedule (or on demand) in GitHub Actions, so you never nee
 - ❔[Features](#features)
 - ⏭️ [Getting started](#getting-started)
 - [Local testing](#local-testing)
-- ⭐ [Join more than 161,000 users!](#join-more-than-161000-users)
+- ⭐ [Join more than 91,000 users!](#join-more-than-91000-users)
 - [Configuration](#configuration)
 - [Repository structure](#repository-structure)
 - [Manual Troubleshooting Runners (optional)](#manual-troubleshooting-runners-optional)
@@ -34,7 +34,7 @@ This ensures your follow list stays active while you're busy coding.
 ## Features
 
 - **Automated Follow / Unfollow**  
-  - Follows 5 to 55 fresh users each run, from `config/usernames.txt` (**now over 161,000 deduplicated, proofchecked usernames**).
+  - Follows 5 to 155 fresh users each run, from `config/usernames.txt` (**now over 91,000 deduplicated, proofchecked usernames**).
   - Only targets users who have been active in the last 3 days for maximum impact.
   - Duplicates and dead accounts are continuously pruned and removed.
   - Unfollows non-reciprocals.  
@@ -68,8 +68,8 @@ This ensures your follow list stays active while you're busy coding.
 1. **Fork** or **clone** this repo.
 2. In **Settings → Secrets → Actions**, add your Github PAT as `PAT_TOKEN` (scope: `user:follow`).
 3. In **Settings → Variables → Repository variables**, add **`BOT_USER`** with _your_ GitHub username. *This prevents the workflow from running in other people’s forks unless they set their own name.*
-4. **161,000+ members like you who want to grow are waiting for you in** `config/usernames.txt`.  
-You can join this list too—see below (**⭐ & Join more than 161,000 users!**).
+4. **91,000+ members like you who want to grow are waiting for you in** `config/usernames.txt`.  
+You can join this list too—see below (**⭐ & Join more than 91,000 users!**).
 5. (Optional) Tweak the schedules in your workflow files:
     - `.github/workflows/run_follow.yml` runs **hourly at minute 5** by default.
     - `.github/workflows/run_unfollow.yml` runs **every 10 hours at minute 5** (UTC) by default.
@@ -93,14 +93,14 @@ python scripts/cleaner.py
 python scripts/gitgrow.py
 ````
 
-## Join more than 161,000 users!
+## Join more than 91,000 users!
 
 Want in? It’s effortless. If you:
 
 1. **Star** this repository, **AND**
 2. **Follow** both **[@ikramagix](https://github.com/ikramagix)** and **[@gr33kurious](https://github.com/gr33kurious)**
 
-then your username will be **automatically** added to the master `usernames.txt` list alongside the **161,000+** active members!
+then your username will be **automatically** added to the master `usernames.txt` list alongside the **91,000+** active members!
 
 Let's grow! 💪
 
@@ -111,7 +111,7 @@ Let's grow! 💪
 | PAT\_TOKEN          | Your PAT with `user:follow` scope, added in your secrets   | (empty) **required**   |
 | USERNAME\_FILE      | File listing target usernames (in the `config/` directory) | `config/usernames.txt` |
 | WHITELIST\_FILE     | File listing usernames never to unfollow (in `config/`)    | `config/whitelist.txt` |
-| FOLLOWERS\_PER\_RUN | Number of new users to follow each run                     | Random value: `5–55 per run`|
+| FOLLOWERS\_PER\_RUN | Number of new users to follow each run                     | Random value: `5–155 per run`|
 
 ## Repository structure
 
@@ -128,7 +128,7 @@ Let's grow! 💪
 ├── .gitignore
 ├── README.md
 ├── config
-│   ├── usernames.txt              # 161,000+ community members (deduped, activity filtered)
+│   ├── usernames.txt              # 91,000+ community members (deduped, activity filtered)
 │   ├── organizations.txt          # (Optional) org members, only relevant if using run_orgs.yml
 │   └── whitelist.txt              # accounts to always skip
 ├── logs                           # CI artifacts (gitignored)

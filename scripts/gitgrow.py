@@ -66,11 +66,11 @@ def main():
                 print(f"[PRIVATE] {login} inaccessible: {e}")
             continue
 
-        # — activity filter (last 3 days) —
+        # — activity filter (last 30 days) —
         try:
             events = user.get_events()
             last_event = next(iter(events), None)  # PaginatedList to iterator
-            if not last_event or last_event.created_at < datetime.now(timezone.utc) - timedelta(days=3): #UTC conversion 
+            if not last_event or last_event.created_at < datetime.now(timezone.utc) - timedelta(days=30): #UTC conversion 
                 print(f"[SKIP] {login} inactive (last event: {last_event.created_at if last_event else 'none'})")
                 continue
         except GithubException as e:

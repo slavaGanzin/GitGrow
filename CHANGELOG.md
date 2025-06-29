@@ -47,4 +47,28 @@
 [@ikramagix](https://github.com/ikramagix)
 [All commits →](https://github.com/ikramagix/GitGrowBot/commits/1.1.0)
 
+## [1.1.1] – 2025-06-29
+
+### Added
+
+* **Stargazer Reciprocity**
+  - New scripts: `scripts/autostar.py` and `scripts/autotrack.py` for automated stargazer reciprocity.
+    - Automatically stars a public repository for each new stargazer (subject to per-user repo limit, skip if >50 repos).
+    - Unstars users who remove their star.
+    - Hard limits (e.g. max 5 new stargazers and 5 growth users per run) to avoid API and rate-limit abuse.
+    - Growth starring from `config/usernames.txt` still supported (sample, skip excessive repos).
+* **Workflow Integration**
+  - `.github/workflows/autostar.yml`: Scheduled and manual stargazer reciprocity workflow.
+  - All state and log artifacts (e.g. `stargazer_state.json`) are versioned to the `tracker-data` branch and attached as workflow artifacts.
+* **Documentation**
+  - Updated `README.md` for new starring features, tracker-data state handling, and full setup instructions.
+
+### Changed
+
+* State file handling is now more robust and incremental for stargazer reciprocity.
+* Documentation improved for clarity regarding analytics and reciprocity workflows.
+
+**Contributors:**
+[@ikramagix](https://github.com/ikramagix)
+[All commits →](https://github.com/ikramagix/GitGrowBot/commits/1.1.1)
 ---

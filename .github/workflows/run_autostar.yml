@@ -8,58 +8,43 @@ name: GitGrowBot AutoStar (Scheduled)
 
 on:
   schedule:
-    - cron: '20 */1 * * *'  # Runs every hour at minute 20
-  workflow_dispatch:        # Allows manual trigger
+    - cron: '20 */1 * * *'
+  workflow_dispatch:
 
 jobs:
   autostar:
     runs-on: ubuntu-latest
     permissions:
-      contents: write       # Needed for pushing changes
+      contents: write
 
     steps:
-      # 1. Checkout the main branch (for code and scripts)
       - name: Checkout main (code/scripts)
         uses: actions/checkout@v4
         with:
           ref: main
 
-      # 2. Fetch .github/state/ from tracker-data and overlay it in workspace
       - name: Fetch state from tracker-data
         run: |
           git fetch origin tracker-data:tracker-data
           mkdir -p .github/state/
           git checkout tracker-data -- .github/state/ || true
-          git checkout main
 
-      # 3. Set up Python 3.11
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: 3.11
 
-      # 4. Install Python dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 5. Run autostar.py (calls autotrack.py if needed)
       - name: Run autostar.py (auto-runs autotrack.py if needed)
         run: python3 scripts/autostar.py
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           BOT_USER: ${{ vars.BOT_USER }}
 
-      # 6. Ensure the local tracker-data branch is up to date before pushing.
-      - name: Sync tracker-data branch before push
-        run: |
-          git fetch origin tracker-data:tracker-data
-          git checkout tracker-data
-          git pull --rebase origin tracker-data || true
-          git checkout main
-
-      # 7. Commit and push the state JSON to tracker-data branch
       - name: Commit and push stargazer state to tracker-data
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
@@ -67,7 +52,6 @@ jobs:
           branch: tracker-data
           file_pattern: .github/state/stargazer_state.json
 
-      # 8. Upload the state file as a workflow artifact (for debugging/auditing)
       - name: Upload stargazer state as artifact
         uses: actions/upload-artifact@v4
         with:

@@ -4,6 +4,7 @@ import os
 import sys
 import json
 import random
+import subprocess
 from pathlib import Path
 from github import Github
 
@@ -17,9 +18,16 @@ def main():
     if not TOKEN or not BOT_USER:
         sys.stderr.write("GITHUB_TOKEN and BOT_USER required\n")
         sys.exit(1)
+
+    # Ensure state exists, create if not
     if not STATE_PATH.exists():
-        sys.stderr.write(f"{STATE_PATH} not found; run autotrack.py first.\n")
-        sys.exit(1)
+        print(f"{STATE_PATH} not found; running autotrack.py to generate state.")
+        result = subprocess.run(["python3", "scripts/autotrack.py"], capture_output=True, text=True)
+        print(result.stdout)
+        if result.returncode != 0 or not STATE_PATH.exists():
+            sys.stderr.write("autotrack.py failed or did not create state; aborting.\n")
+            print(result.stderr)
+            sys.exit(1)
 
     gh = Github(TOKEN)
     me = gh.get_user()

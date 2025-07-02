@@ -3,6 +3,7 @@
 import os
 import sys
 import json
+import subprocess
 from pathlib import Path
 from github import Github
 from datetime import datetime, timedelta, timezone

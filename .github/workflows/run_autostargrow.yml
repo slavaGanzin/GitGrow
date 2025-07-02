@@ -6,8 +6,8 @@ name: GitGrow StarGrow (Scheduled)
 # If .github/state/stargazer_state.json is missing, autotrack.py is called as a precaution to ensure all logic can proceed.
 
 on:
-  # schedule:
-    # - cron: '20 0,6,12,18 * * *'  # Fine for most users; adjust as needed if you expect high volume of growth actions.
+  schedule:
+    - cron: '20 0,6,12,18 * * *'  # Fine for most users; adjust as needed if you expect high volume of growth actions.
   workflow_dispatch:
 
 jobs:

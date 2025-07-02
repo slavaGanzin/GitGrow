@@ -6,8 +6,8 @@ name: GitGrow UnstarBack (Scheduled)
 # The results are committed to the tracker-data branch and uploaded as an artifact.
 
 on:
-  # schedule:
-    # - cron: '25 3,9,15,21 * * *'  # Four times daily, three hours after autostarback
+  schedule:
+    - cron: '25 3,9,15,21 * * *'  # Four times daily, three hours after autostarback
   workflow_dispatch:
 
 jobs:

@@ -25,4 +25,7 @@ Thumbs.db
 .gitignore
 
 # Drafts and other files
-.github/workflows/run_bot.yml
+.github/state/
+
+# Only for local use
+scripts/unstar_nonreciprocals.py

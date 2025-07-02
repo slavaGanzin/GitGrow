@@ -34,7 +34,7 @@ The motto **“You only get what you give”** drives GitGrowBot’s behavior:
 
 - **Automated Follow / Unfollow**  
   - Follows 5 to 155 fresh users each run, from `config/usernames.txt` (**now over 91,000 deduplicated, proofchecked usernames**).
-  - Only targets users who have been active in the last 3 days for maximum impact.
+  - Only targets users who have been active in the last 30 days for maximum impact.
   - Duplicates and dead accounts are continuously pruned and removed.
   - Unfollows non-reciprocals.  
   - Skips any usernames you whitelist.  
@@ -51,7 +51,7 @@ The motto **“You only get what you give”** drives GitGrowBot’s behavior:
   - `scripts/integrity.py` for users existence check.
   - `scripts/orgs.py` for optional org member targeting (deprecated, see [CHANGELOG.md](./CHANGELOG.md))
   - `scripts/autotrack.py` tracks all unique stargazers across your repos, logs "unstargazers," and updates `.github/state/stargazer_state.json` (persisted to the `tracker-data` branch).
-  - `scripts/autostar.py` automatically stars back new stargazers (with action limits for rate safety), unstars users who unstar you, and skips users with excessive public repos.
+  - `scripts/autostarback.py` automatically stars back new stargazers (with action limits for rate safety), unstars users who unstar you, and skips users with excessive public repos.
 
 - **Prebuilt Workflow**  
   - `.github/workflows/run_follow.yml`: Runs **every hour at minute 5** (UTC) by default.
@@ -116,10 +116,10 @@ Let's grow! 💪
 
 | Options             | Description                                                | Default                |
 | ------------------- | ---------------------------------------------------------- | ---------------------- |
-| PAT\_TOKEN          | Your PAT with `user:follow` scope, added in your secrets   | (empty) **required**   |
+| PAT\_TOKEN          | Your PAT with `user:follow` scopes, added in your secrets   | (empty) **required**   |
 | USERNAME\_FILE      | File listing target usernames (in the `config/` directory) | `config/usernames.txt` |
 | WHITELIST\_FILE     | File listing usernames never to unfollow (in `config/`)    | `config/whitelist.txt` |
-| FOLLOWERS\_PER\_RUN | Number of new users to follow each run                     | Random value: `5–155 per run`|
+| FOLLOWERS\_PER\_RUN | Number of new users to follow each run                     | Random value: `5–155 per run`| 
 
 ## Repository structure
 
@@ -148,8 +148,8 @@ Let's grow! 💪
 ├── unfollowers.py # Unfollow-only logic
 ├── cleaner.py # Username list maintenance
 ├── integrity.py # Username existence check and cleaning
-├── autostar.py # Stargazer reciprocity logic: stars/un-stars
-├── autotrack.py # Stargazer tracker/state generator (called by autostar.py)
+├── autostarback.py # Stargazer reciprocity logic: stars/un-stars
+├── autotrack.py # Stargazer tracker/state generator (called by autostarback.py)
 └── orgs.py # (Deprecated) org follow extension
 ├── tests/
 │ ├── test_bot_core_behavior.py # follow/unfollow/follow-back

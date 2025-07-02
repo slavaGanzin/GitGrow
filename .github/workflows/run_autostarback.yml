@@ -1,18 +1,18 @@
-# .github/workflows/autostar.yml
-name: GitGrowBot AutoStar (Scheduled)
-# This workflow is used to run the GitGrowBot autostar bot on a schedule.
+# .github/workflows/run_autostarback.yml
+name: GitGrowBot AutoStarBack (Scheduled)
+# This workflow is used to run the GitGrowBot autostarback bot on a schedule.
 # It is triggered every hour at minute 5, and can also be run manually.
-# The autostar bot processes stargazers and logs reciprocity results.
-# It fetches state from the tracker-data branch and commits results back there.
-# It also uploads the stargazer logs as an artifact.
+# It checks for new stars on repositories and updates the stargazer state accordingly.
+# The results are committed to the tracker-data branch and uploaded as an artifact.
+# It then uses the state file to determine which users repositories to star back.
 
 on:
   schedule:
-    - cron: '20 */1 * * *'
+    - cron: '20 0,6,12,18 * * *'  # Fine for most users. If you expect >100 new stargazers per day, increase run frequency or set a stricter per-run limit to avoid GitHub API rate limit stalls.
   workflow_dispatch:
 
 jobs:
-  autostar:
+  autostarback:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -39,8 +39,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run autostar.py (auto-runs autotrack.py if needed)
-        run: python3 scripts/autostar.py
+      - name: Run autostarback.py (first trigger will also run autotrack.py if needed)
+        run: python3 scripts/autostarback.py
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           BOT_USER: ${{ vars.BOT_USER }}

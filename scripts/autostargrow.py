@@ -62,18 +62,12 @@ def main():
         print(f"  [{i+1}/{len(sample)}] Growth star for user: {user}")
         try:
             u = gh.get_user(user)
-            repo_iter = u.get_repos()
             repos = []
-            # Fetch only the first 3 eligible repos to minimize API requests
-            fetched = 0
-            while fetched < 3:
-                try:
-                    repo = next(repo_iter)
-                except StopIteration:
-                    break
+            for repo in u.get_repos():
                 if not repo.fork and not repo.private:
                     repos.append(repo)
-                fetched += 1
+                if len(repos) >= 3:
+                    break
             if not repos:
                 print(f"    No public repos to star for {user}, skipping.")
                 continue

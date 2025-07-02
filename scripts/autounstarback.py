@@ -12,6 +12,17 @@ STATE_PATH = Path(".github/state/stargazer_state.json")
 DAYS_UNTIL_UNSTAR = 4  # Unstar if not reciprocated within this period
 
 def main():
+    # Always refresh state file before proceeding
+    try:
+        print("Refreshing stargazer state with autotrack.py ...")
+        subprocess.run(
+            [sys.executable, "scripts/autotrack.py"],
+            check=True,
+            env={**os.environ, "PAT_TOKEN": TOKEN, "BOT_USER": BOT_USER or ""}
+        )
+    except Exception as e:
+        print(f"ERROR: Failed to run autotrack.py: {e}", file=sys.stderr)
+        sys.exit(1)
     print("=== GitGrowBot autounstarback.py started ===")
     if not TOKEN:
         print("ERROR: PAT_TOKEN required.", file=sys.stderr)
@@ -25,24 +36,19 @@ def main():
     with open(STATE_PATH) as f:
         state = json.load(f)
     current_stargazers = set(state.get("current_stargazers", []))
-    starred_users = state.get("starred_users", {})
+    growth_starred = state.get("growth_starred", {})
     unresponsive = state.get("unresponsive", {})
+    mutual_stars = state.get("mutual_stars", {})  # <-- Add this line if not present
 
     now = datetime.now(timezone.utc)
     changed = False
 
-    for user, starred in list(starred_users.items()):
-        for repo_obj in list(starred):
-            # Support both formats: dict with timestamp or legacy string
-            if isinstance(repo_obj, dict):
-                repo_name = repo_obj["repo"]
-                starred_at = repo_obj.get("starred_at")
-            else:
-                repo_name = repo_obj
-                starred_at = None
-
+    for user, actions in list(growth_starred.items()):
+        for entry in list(actions):
+            repo_name = entry["repo"]
+            starred_at = entry.get("starred_at")
             if user in current_stargazers:
-                continue  # Still a stargazer, do nothing
+                continue  # Reciprocated, so we skip
 
             if starred_at:
                 try:
@@ -58,10 +64,12 @@ def main():
                         gh.get_user().remove_from_starred(repo)
                     except Exception as e:
                         print(f"  Warning: could not unstar {repo_name}: {e}")
-                    if user not in unresponsive:
-                        unresponsive[user] = []
-                    unresponsive[user].append(repo_obj)
-                    starred_users[user].remove(repo_obj)
+                    unresponsive.setdefault(user, [])
+                    unresponsive[user].append(entry)
+                    growth_starred[user].remove(entry)
+                    # --- CLEANUP: remove from mutual_stars as well
+                    if user in mutual_stars:
+                        del mutual_stars[user]
                     changed = True
             else:
                 # No timestamp: unstar and remove, do NOT add to unresponsive
@@ -71,15 +79,20 @@ def main():
                     gh.get_user().remove_from_starred(repo)
                 except Exception as e:
                     print(f"  Warning: could not unstar {repo_name}: {e}")
-                starred_users[user].remove(repo_obj)
+                growth_starred[user].remove(entry)
+                # --- CLEANUP: remove from mutual_stars as well (legacy)
+                if user in mutual_stars:
+                    del mutual_stars[user]
                 changed = True
 
         # Clean up if user has no more starred repos
-        if user in starred_users and not starred_users[user]:
-            del starred_users[user]
+        if user in growth_starred and not growth_starred[user]:
+            del growth_starred[user]
 
-    state["starred_users"] = starred_users
+    state["growth_starred"] = growth_starred
     state["unresponsive"] = unresponsive
+    state["mutual_stars"] = mutual_stars  # <-- Ensure this updated
+
     if changed:
         with open(STATE_PATH, "w") as f:
             json.dump(state, f, indent=2)

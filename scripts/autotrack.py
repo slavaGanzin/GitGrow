@@ -35,14 +35,20 @@ def main():
         print("ERROR: Failed to list repos:", e)
         sys.exit(1)
 
-    # Gather unique stargazer usernames across all repos
+    # Gather stargazers and prepare reciprocity mapping
     stargazer_set = set()
+    reciprocity = {}
+
     for idx, repo in enumerate(repos):
         print(f"[{idx+1}/{len(repos)}] Processing repo: {repo.full_name}")
         try:
             count = 0
             for u in repo.get_stargazers():
-                stargazer_set.add(u.login)
+                login = u.login
+                stargazer_set.add(login)
+                if login not in reciprocity:
+                    reciprocity[login] = {"starred_by": [], "starred_back": []}
+                reciprocity[login]["starred_by"].append(repo.full_name)
                 count += 1
                 if count % 20 == 0:
                     print(f"    {count} stargazers fetched so far for this repo...")
@@ -53,18 +59,23 @@ def main():
     current_stargazers = sorted(stargazer_set)
     print(f"Total unique stargazers across all repos: {len(current_stargazers)}")
 
-    # Load previous state if exists
+    # Load previous state if exists (keep mutual_stars for legacy)
     if STATE_PATH.exists():
         print(f"Loading previous state from {STATE_PATH} ...")
         with open(STATE_PATH, "r") as f:
             state = json.load(f)
         previous_stargazers = set(state.get("current_stargazers", []))
-        starred_users = state.get("starred_users", {})
-        print(f"Previous stargazers: {len(previous_stargazers)}, starred_users: {len(starred_users)}")
+        mutual_stars = state.get("mutual_stars", {})
+        # Optionally, try to keep old starred_back for each user
+        if "reciprocity" in state:
+            for user, info in state["reciprocity"].items():
+                if user in reciprocity:
+                    reciprocity[user]["starred_back"] = info.get("starred_back", [])
+        print(f"Previous stargazers: {len(previous_stargazers)}, mutual_stars: {len(mutual_stars)}")
     else:
         print("No previous state found.")
         previous_stargazers = set()
-        starred_users = {}
+        mutual_stars = {}
 
     # Detect unstargazers: users who have unstarred since last run
     unstargazers = sorted(list(previous_stargazers - stargazer_set))
@@ -74,8 +85,9 @@ def main():
     print("Saving new state ...")
     new_state = {
         "current_stargazers": current_stargazers,
-        "starred_users": starred_users,
-        "unstargazers": unstargazers
+        "mutual_stars": mutual_stars,
+        "unstargazers": unstargazers,
+        "reciprocity": reciprocity,
     }
     STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(STATE_PATH, "w") as f:

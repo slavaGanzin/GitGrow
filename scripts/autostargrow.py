@@ -6,6 +6,7 @@ import json
 import random
 from pathlib import Path
 from github import Github
+from datetime import datetime, timezone
 
 BOT_USER = os.getenv("BOT_USER")
 TOKEN = os.getenv("PAT_TOKEN")
@@ -35,15 +36,15 @@ def main():
         print("ERROR: Could not authenticate with GitHub:", e)
         sys.exit(1)
 
-    # Load previous starred users from state file if available
-    starred_users = {}
+    # Load previous growth_starred users from state file if available
     if STATE_PATH.exists():
         print(f"Loading state from {STATE_PATH} ...")
         with open(STATE_PATH) as f:
             state = json.load(f)
-        starred_users = state.get("starred_users", {})
+        growth_starred = state.get("growth_starred", {})
     else:
         print("No existing stargazer state found; starting fresh.")
+        growth_starred = {}
 
     # Load candidate usernames for growth
     with open(USERNAMES_PATH) as f:
@@ -51,9 +52,11 @@ def main():
     print(f"  Loaded {len(all_usernames)} usernames from {USERNAMES_PATH}")
 
     # Exclude already starred users
-    available = set(all_usernames) - set(starred_users)
+    available = set(all_usernames) - set(growth_starred)
     print(f"  {len(available)} candidates for growth starring.")
     sample = random.sample(list(available), min(GROWTH_SAMPLE, len(available)))
+
+    now_iso = datetime.now(timezone.utc).isoformat()
 
     for i, user in enumerate(sample):
         print(f"  [{i+1}/{len(sample)}] Growth star for user: {user}")
@@ -77,22 +80,26 @@ def main():
             repo = random.choice(repos)
             print(f"    Starring repo: {repo.full_name}")
             me.add_to_starred(repo)
-            starred_users[user] = [repo.full_name]
-            print(f"    Growth: Starred {repo.full_name} for {user}")
+            growth_starred.setdefault(user, [])
+            growth_starred[user].append({
+                "repo": repo.full_name,
+                "starred_at": now_iso
+            })
+            print(f"    Growth: Starred {repo.full_name} for {user} at {now_iso}")
         except Exception as e:
             print(f"    Failed to star for growth {user}: {e}")
 
-    # Save updated starred_users to state file
-    print(f"Saving updated starred_users to {STATE_PATH} ...")
+    # Save updated growth_starred to state file
+    print(f"Saving updated growth_starred to {STATE_PATH} ...")
     if STATE_PATH.exists():
         with open(STATE_PATH) as f:
             state = json.load(f)
     else:
         state = {}
-    state["starred_users"] = starred_users
+    state["growth_starred"] = growth_starred
     with open(STATE_PATH, "w") as f:
         json.dump(state, f, indent=2)
-    print(f"Updated starred_users written to {STATE_PATH}")
+    print(f"Updated growth_starred written to {STATE_PATH}")
 
     print("=== GitGrowBot autostargrow.py finished ===")
 

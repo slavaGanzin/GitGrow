@@ -3,90 +3,97 @@
 import os
 import sys
 import json
-import random
-import subprocess
 from pathlib import Path
 from github import Github
 from datetime import datetime, timezone
 
-BOT_USER = os.getenv("BOT_USER")
 TOKEN = os.getenv("PAT_TOKEN")
+BOT_USER = os.getenv("BOT_USER")
 STATE_PATH = Path(".github/state/stargazer_state.json")
-RECIPROCITY_LIMIT = 20   # Limit for reciprocal (stargazer) starring per run
 
 def main():
-    print("=== GitGrowBot autostarback.py started ===")
-
-    if not TOKEN or not BOT_USER:
-        print("ERROR: PAT_TOKEN and BOT_USER required", file=sys.stderr)
-        sys.exit(1)
-    print(f"PAT_TOKEN and BOT_USER env vars present.")
-    print(f"BOT_USER: {BOT_USER}")
-
-    # Ensure state exists, create if not
-    if not STATE_PATH.exists():
-        print(f"{STATE_PATH} not found; running autotrack.py to generate state.")
-        result = subprocess.run(["python3", "scripts/autotrack.py"], capture_output=True, text=True)
-        print("[autotrack.py stdout]:", result.stdout)
-        if result.returncode != 0 or not STATE_PATH.exists():
-            print("ERROR: autotrack.py failed or did not create state; aborting.", file=sys.stderr)
-            print("[autotrack.py stderr]:", result.stderr)
-            sys.exit(1)
-        print("autotrack.py succeeded, state created.")
-
-    print("Authenticating with GitHub...")
-    gh = Github(TOKEN)
+    # Always refresh state file before proceeding
     try:
-        me = gh.get_user()
-        print(f"Authenticated as: {me.login}")
+        print("Refreshing stargazer state with autotrack.py ...")
+        subprocess.run(
+            [sys.executable, "scripts/autotrack.py"],
+            check=True,
+            env={**os.environ, "PAT_TOKEN": TOKEN, "BOT_USER": BOT_USER or ""}
+        )
     except Exception as e:
-        print("ERROR: Could not authenticate with GitHub:", e)
+        print(f"ERROR: Failed to run autotrack.py: {e}", file=sys.stderr)
+        sys.exit(1)
+    if not TOKEN or not BOT_USER:
+        print("ERROR: PAT_TOKEN and BOT_USER required.", file=sys.stderr)
+        sys.exit(1)
+    if not STATE_PATH.exists():
+        print(f"ERROR: {STATE_PATH} not found.", file=sys.stderr)
         sys.exit(1)
 
-    print(f"Loading state from {STATE_PATH} ...")
     with open(STATE_PATH) as f:
         state = json.load(f)
+
     current_stargazers = set(state.get("current_stargazers", []))
-    starred_users = state.get("starred_users", {})
-    print(f"Loaded {len(current_stargazers)} stargazers, {len(starred_users)} starred_users.")
-
-    # Star back new stargazers (reciprocity, up to limit)
-    print(f"== Star new stargazers: {len(current_stargazers)} to check ==")
-    new_to_star = [u for u in current_stargazers if u not in starred_users]
-    print(f"Found {len(new_to_star)} new users to star. Limiting to {RECIPROCITY_LIMIT} per run.")
-    new_to_star = new_to_star[:RECIPROCITY_LIMIT]  # Limit per run
-
+    mutual_stars = state.get("mutual_stars", {})
     now = datetime.now(timezone.utc).isoformat()
-    for i, user in enumerate(new_to_star):
-        print(f"  [{i+1}/{len(new_to_star)}] Processing user: {user}")
+
+    gh = Github(TOKEN)
+    me = gh.get_user(BOT_USER)
+    my_repos = {repo.full_name for repo in me.get_repos()}
+
+    for user in current_stargazers:
         try:
             u = gh.get_user(user)
-            # Fetch up to first 5 public, non-fork repos
-            repos = [r for r in u.get_repos() if not r.fork and not r.private][:5]
-            print(f"    Found {len(repos)} public non-fork repos for {user} (first 5 considered)")
-            if not repos:
-                print(f"    No public repos to star for {user}, skipping.")
-                continue
-            repo = random.choice(repos)
-            print(f"    Starring repo: {repo.full_name}")
-            me.add_to_starred(repo)
-            # Store as object with repo and timestamp
-            starred_users[user] = [{
-                "repo": repo.full_name,
-                "starred_at": now
-            }]
-            print(f"    Starred {repo.full_name} for {user} at {now}")
-        except Exception as e:
-            print(f"    Failed to star for {user}: {e}")
+            # How many of my repos has this user starred?
+            user_star_count = 0
+            for repo in my_repos:
+                repo_obj = gh.get_repo(repo)
+                if any(sg.login == user for sg in repo_obj.get_stargazers()):
+                    user_star_count += 1
+            print(f"{user} has starred {user_star_count} of your repos.")
 
-    # Save updated state
-    print(f"Saving updated state to {STATE_PATH} ...")
-    state["starred_users"] = starred_users
+            # How many of their repos have you starred?
+            your_stars = mutual_stars.get(user, [])
+            if your_stars and isinstance(your_stars[0], dict):
+                your_stars = [d['repo'] for d in your_stars]
+            your_star_count = len(your_stars)
+            print(f"You have starred {your_star_count} of {user}'s repos.")
+
+            # Get candidate repos to star for this user (first 5 for efficiency)
+            user_repos = [r for r in u.get_repos() if not r.fork and not r.private][:5]
+
+            # Star/unstar as needed to match counts
+            while your_star_count < user_star_count and len(user_repos) > your_star_count:
+                repo = user_repos[your_star_count]
+                me.add_to_starred(repo)
+                # Append new star to mutual_stars with timestamp
+                mutual_stars.setdefault(user, [])
+                mutual_stars[user].append({
+                    "repo": repo.full_name,
+                    "starred_at": now
+                })
+                your_star_count += 1
+                print(f"Starred {repo.full_name} for {user} to match count.")
+
+            while your_star_count > user_star_count and your_star_count > 0:
+                repo_name = your_stars[-1]
+                repo = gh.get_repo(repo_name)
+                me.remove_from_starred(repo)
+                mutual_stars[user].pop()
+                your_star_count -= 1
+                print(f"Unstarred {repo.full_name} for {user} to match count.")
+
+            # Log result
+            print(f"Final: {user}: user_starred_yours={user_star_count}, you_starred_theirs={your_star_count}")
+
+        except Exception as e:
+            print(f"Error processing {user}: {e}")
+
+    # Update state
+    state["mutual_stars"] = mutual_stars
     with open(STATE_PATH, "w") as f:
         json.dump(state, f, indent=2)
-    print(f"Updated state written to {STATE_PATH}")
-
-    print("=== GitGrowBot autostarback.py finished ===")
+    print("State updated.")
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,5 @@
 # .github/workflows/stargazer_shoutouts.yml
-name: GitGrowBot Stargazer Shoutouts (Manual)
+name: GitGrow Shoutouts (Manual)
 # This workflow is used to run the GitGrowBot stargazer shoutouts script.
 # It is triggered manually by maintainers only.
 # The script processes the stargazers of the repository and generates shoutouts.

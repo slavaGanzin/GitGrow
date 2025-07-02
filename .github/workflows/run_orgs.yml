@@ -1,5 +1,5 @@
-# .github/workflows/run_orgs.yml (draft)
-name: Org Targeter [DEPRECATED]
+# .github/workflows/run_orgs.yml (deprecated)
+name: DEPRECATED Org Targeter [WILL BE DELETED SOON]
 # DEPRECATION NOTICE: This automation yielded minimal engagement returns
 # Original purpose: Mass-follow target organizations to boost visibility
 # Retired because:

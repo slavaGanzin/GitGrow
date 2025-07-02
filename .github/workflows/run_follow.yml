@@ -1,5 +1,5 @@
 # .github/workflows/run_follow.yml
-name: GitGrowBot Follower (Scheduled)
+name: GitGrow Follow (Scheduled)
 # This workflow is used to run the GitGrowBot follow bot on a schedule.
 # It is triggered every hour at minute 5, and can also be run manually.
 # The follow bot processes a random number of new follows (5–155) each run.

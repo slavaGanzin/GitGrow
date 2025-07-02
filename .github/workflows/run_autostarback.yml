@@ -1,5 +1,5 @@
 # .github/workflows/run_autostarback.yml
-name: GitGrowBot AutoStarBack (Scheduled)
+name: GitGrow StarBack (Scheduled)
 # This workflow is used to run the GitGrowBot autostarback bot on a schedule.
 # It is triggered four times per day (00:25, 06:25, 12:25, 18:25 UTC), and can also be run manually.
 # It checks for new stars on repositories and updates the stargazer state accordingly.

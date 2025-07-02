@@ -1,5 +1,5 @@
 # .github/workflows/run_unfollow.yml
-name: GitGrowBot Unfollower (Scheduled)
+name: GitGrow Unfollow (Scheduled)
 # This workflow is used to run the GitGrowBot unfollow bot on a schedule.
 # It is triggered by a cron schedule and can also be run manually.
 # The workflow is designed to run the unfollow bot.

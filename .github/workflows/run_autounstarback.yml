@@ -1,5 +1,5 @@
 # .github/workflows/run_autounstarback.yml
-name: GitGrowBot AutoUnstarBack (Scheduled)
+name: GitGrow UnstarBack (Scheduled)
 # This workflow runs your autounstarback bot on a schedule.
 # It is triggered four times per day (00:35, 06:35, 12:35, 18:35 UTC), and can also be run manually.
 # It checks for users who have not reciprocated stars after 4 days and unstars them accordingly.

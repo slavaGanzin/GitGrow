@@ -1,5 +1,5 @@
 # .github/workflows/run_autostargrow.yml
-name: GitGrowBot AutoStarGrow (Scheduled)
+name: GitGrow StarGrow (Scheduled)
 # This workflow is used to run the GitGrowBot autostargrow bot on a schedule.
 # It is triggered four times per day (00:20, 06:20, 12:20, 18:20 UTC), and can also be run manually.
 # It performs growth starring from config/usernames.txt, with results committed to the tracker-data branch and exported as an artifact.

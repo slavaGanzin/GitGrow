@@ -92,21 +92,27 @@ def main():
             while your_star_count < user_star_count and len(user_repos) > your_star_count:
                 repo = user_repos[your_star_count]
                 print(f"[autostarback] Starring {repo.full_name} for {user} (to match count)")
-                me.add_to_starred(repo)
-                mutual_stars.setdefault(user, [])
-                mutual_stars[user].append({
-                    "repo": repo.full_name,
-                    "starred_at": now
-                })
-                your_star_count += 1
+                try:
+                    me.add_to_starred(repo)
+                    mutual_stars.setdefault(user, [])
+                    mutual_stars[user].append({
+                        "repo": repo.full_name,
+                        "starred_at": now
+                    })
+                    your_star_count += 1
+                except Exception as err:
+                    print(f"[autostarback] ERROR: Failed to star {repo.full_name} for {user}: {err}")
 
             while your_star_count > user_star_count and your_star_count > 0:
                 repo_name = your_stars[-1]
                 print(f"[autostarback] Unstarring {repo_name} for {user} (to match count)")
-                repo = gh.get_repo(repo_name)
-                me.remove_from_starred(repo)
-                mutual_stars[user].pop()
-                your_star_count -= 1
+                try:
+                    repo = gh.get_repo(repo_name)
+                    me.remove_from_starred(repo)
+                    mutual_stars[user].pop()
+                    your_star_count -= 1
+                except Exception as err:
+                    print(f"[autostarback] ERROR: Failed to unstar {repo_name} for {user}: {err}")
 
             print(f"[autostarback] Final: {user}: user_starred_yours={user_star_count}, you_starred_theirs={your_star_count}")
 

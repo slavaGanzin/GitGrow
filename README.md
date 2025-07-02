@@ -126,35 +126,35 @@ Let's grow! 💪
 ```
 ├── .gitattributes
 ├── .github
-│ └── workflows
-│ ├── run_follow.yml # Scheduled: follow-only (hourly @ :05)
-│ ├── run_unfollow.yml # Scheduled: unfollow-only (daily every 10 hours @ :05 UTC)
-│ ├── autostar.yml # scheduled/manual: stargazer reciprocity (tracks, stars/un-stars on tracker-data branch)
-│ ├── run_orgs.yml # (Deprecated, optional) targets famous organizations for exposure
-│ ├── manual_follow.yml # workflow_dispatch → follow only
-│ ├── manual_unfollow.yml # workflow_dispatch → unfollow only
-│ └── stargazer_shoutouts.yml # keep it deactivated - its purpose is to generate stargazer shoutouts
+│   └── workflows
+│       ├── run_follow.yml              # Scheduled: follow-only (hourly @ :05)
+│       ├── run_unfollow.yml            # Scheduled: unfollow-only (daily every 10 hours @ :05 UTC)
+│       ├── autostar.yml                # scheduled/manual: stargazer reciprocity (tracks, stars/un-stars on tracker-data branch)
+│       ├── run_orgs.yml                # (Deprecated, optional) targets famous organizations for exposure
+│       ├── manual_follow.yml           # workflow_dispatch → follow only
+│       ├── manual_unfollow.yml         # workflow_dispatch → unfollow only
+│       └── stargazer_shoutouts.yml     # keep it deactivated - its purpose is to generate stargazer shoutouts
 ├── .gitignore
 ├── README.md
 ├── config
-│ ├── usernames.txt # 91,000+ community members (deduped, activity filtered)
-│ ├── organizations.txt # (Optional) org members, only relevant if using run_orgs.yml
-│ └── whitelist.txt # accounts to always skip
-├── logs # CI artifacts (gitignored)
-│ └── offline_usernames-*.txt
+│   ├── usernames.txt                  # 91,000+ community members (deduped, activity filtered)
+│   ├── organizations.txt              # (Optional) org members, only relevant if using run_orgs.yml
+│   └── whitelist.txt                  # accounts to always skip
+├── logs                               # CI artifacts (gitignored)
+│   └── offline_usernames-*.txt
 ├── requirements.txt
-└── scripts
-├── gitgrow.py # Main follow/unfollow driver
-├── unfollowers.py # Unfollow-only logic
-├── cleaner.py # Username list maintenance
-├── integrity.py # Username existence check and cleaning
-├── autostarback.py # Stargazer reciprocity logic: stars/un-stars
-├── autotrack.py # Stargazer tracker/state generator (called by autostarback.py)
-└── orgs.py # (Deprecated) org follow extension
-├── tests/
-│ ├── test_bot_core_behavior.py # follow/unfollow/follow-back
-│ ├── test_unfollowers.py # unfollow-only logic
-│ └── test_cleaner.py # cleaner dedupe + missing-user removal
+├── scripts
+│   ├── gitgrow.py                    # Main follow/unfollow driver
+│   ├── unfollowers.py                # Unfollow-only logic
+│   ├── cleaner.py                    # Username list maintenance
+│   ├── integrity.py                  # Username existence check and cleaning
+│   ├── autostarback.py               # Stargazer reciprocity logic: stars/un-stars
+│   ├── autotrack.py                  # Stargazer tracker/state generator (called by autostarback.py)
+│   └── orgs.py                       # (Deprecated) org follow extension
+├── tests
+│   ├── test_bot_core_behavior.py     # follow/unfollow/follow-back
+│   ├── test_unfollowers.py           # unfollow-only logic
+│   └── test_cleaner.py              # cleaner dedupe + missing-user removal
 ```
 
 ### Manual Troubleshooting Runners (optional)

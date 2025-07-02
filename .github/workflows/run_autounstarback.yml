@@ -1,18 +1,17 @@
-# .github/workflows/run_autostarback.yml
-name: GitGrowBot AutoStarBack (Scheduled)
-# This workflow is used to run the GitGrowBot autostarback bot on a schedule.
-# It is triggered four times per day (00:25, 06:25, 12:25, 18:25 UTC), and can also be run manually.
-# It checks for new stars on repositories and updates the stargazer state accordingly.
+# .github/workflows/run_autounstarback.yml
+name: GitGrowBot AutoUnstarBack (Scheduled)
+# This workflow runs your autounstarback bot on a schedule.
+# It is triggered four times per day (00:35, 06:35, 12:35, 18:35 UTC), and can also be run manually.
+# It checks for users who have not reciprocated stars after 4 days and unstars them accordingly.
 # The results are committed to the tracker-data branch and uploaded as an artifact.
-# It then uses the state file to determine which users repositories to star back.
 
 on:
   schedule:
-    - cron: '25 0,6,12,18 * * *'  # Fine for most users. If you expect >100 new stargazers per day, increase run frequency or set a stricter per-run limit to avoid GitHub API rate limit stalls.
+    - cron: '25 3,9,15,21 * * *'  # Four times daily, three hours after autostarback
   workflow_dispatch:
 
 jobs:
-  autostarback:
+  autounstarback:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -39,8 +38,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run autostarback.py (first trigger will also run autotrack.py if needed)
-        run: python3 scripts/autostarback.py
+      - name: Run autounstarback.py (unstar users who did not reciprocate after 4 days)
+        run: python3 scripts/autounstarback.py
         env:
           PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
           BOT_USER: ${{ vars.BOT_USER }}
@@ -48,7 +47,7 @@ jobs:
       - name: Commit and push stargazer state to tracker-data
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: log stargazer reciprocity results [bot]"
+          commit_message: "chore: clean up unreciprocated growth stars [bot]"
           branch: tracker-data
           file_pattern: .github/state/stargazer_state.json
 

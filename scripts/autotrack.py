@@ -7,15 +7,15 @@ from pathlib import Path
 from github import Github
 
 BOT_USER = os.getenv("BOT_USER")
-TOKEN = os.getenv("GITHUB_TOKEN")
+TOKEN = os.getenv("PAT_TOKEN")
 STATE_PATH = Path(".github/state/stargazer_state.json")
 
 def main():
     print("=== GitGrowBot autotrack.py started ===")
     if not TOKEN or not BOT_USER:
-        print("ERROR: GITHUB_TOKEN and BOT_USER required", file=sys.stderr)
+        print("ERROR: PAT_TOKEN and BOT_USER required", file=sys.stderr)
         sys.exit(1)
-    print(f"GITHUB_TOKEN and BOT_USER env vars present.")
+    print(f"PAT_TOKEN and BOT_USER env vars present.")
     print(f"BOT_USER: {BOT_USER}")
 
     print("Authenticating with GitHub...")

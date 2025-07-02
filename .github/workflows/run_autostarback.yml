@@ -7,7 +7,7 @@ name: GitGrow StarBack (Scheduled)
 # It then uses the state file to determine which users repositories to star back.
 
 on:
-  schedule:
+  # schedule:
     # - cron: '25 0,6,12,18 * * *'  # Fine for most users. If you expect >100 new stargazers per day, increase run frequency or set a stricter per-run limit to avoid GitHub API rate limit stalls.
   workflow_dispatch:
 

@@ -9,6 +9,7 @@ from github import Github
 from datetime import datetime, timedelta, timezone
 
 TOKEN = os.getenv("PAT_TOKEN")
+BOT_USER = os.getenv("BOT_USER")
 STATE_PATH = Path(".github/state/stargazer_state.json")
 DAYS_UNTIL_UNSTAR = 4  # Unstar if not reciprocated within this period
 

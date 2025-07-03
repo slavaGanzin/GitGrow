@@ -37,7 +37,7 @@ def main():
     print(f"[autostarback] Authenticated as: {me.login}")
 
     print("[autostarback] Starting star-back reconciliation loop over all current stargazers ...")
-    for user_idx, user in enumerate(current_stargargazers, 1):
+    for user_idx, user in enumerate(current_stargazers, 1):
         if user not in reciprocity:
             continue
 

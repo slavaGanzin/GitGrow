@@ -28,8 +28,7 @@ def main():
 
     current_stargazers = set(state.get("current_stargazers", []))
     reciprocity = state.get("reciprocity", {})
-    now = datetime.now(timezone.utc)
-    now_iso = now.isoformat()
+    now_iso = datetime.now(timezone.utc).isoformat()
     changed = False
 
     print("[autostarback] Authenticating with GitHub ...")
@@ -38,13 +37,12 @@ def main():
     print(f"[autostarback] Authenticated as: {me.login}")
 
     print("[autostarback] Starting star-back reconciliation loop over all current stargazers ...")
-    for user_idx, user in enumerate(current_stargazers, 1):
+    for user_idx, user in enumerate(current_stargargazers, 1):
         if user not in reciprocity:
             continue
 
         starred_by = reciprocity[user]["starred_by"]
-        starred_back = reciprocity[user]["starred_back"]
-
+        starred_back = reciprocity[user].get("starred_back", [])
         needed = len(starred_by)
         current = len(starred_back)
 
@@ -63,14 +61,14 @@ def main():
             user_repo_names = [r.full_name for r in user_repos]
             max_possible = len(user_repo_names)
 
-            # If cannot match the count and all their repos are already starred, log attempt
+            # If all possible repos are already starred, but still unbalanced, log the attempt with timestamp
             if needed > max_possible and current >= max_possible:
                 print(f"[autostarback] Cannot match reciprocity for {user} (starred_by={needed}, user has only {max_possible} repos). Logging unbalanced attempt.")
                 reciprocity[user]["last_unbalanced_attempt"] = now_iso
                 changed = True
                 continue
 
-            # Star more of their repos if needed
+            # Star more of their repos if needed, up to the max possible
             while len(starred_back) < needed and len(user_repo_names) > len(starred_back):
                 repo_name = user_repo_names[len(starred_back)]
                 print(f"[autostarback] Starring {repo_name} for {user} (to match count)")
@@ -81,19 +79,6 @@ def main():
                     changed = True
                 except Exception as err:
                     print(f"[autostarback] ERROR: Failed to star {repo_name} for {user}: {err}")
-                    break
-
-            # Unstar extra repos if needed
-            while len(starred_back) > needed:
-                repo_name = starred_back[-1]
-                print(f"[autostarback] Unstarring {repo_name} for {user} (to match count)")
-                try:
-                    repo = gh.get_repo(repo_name)
-                    me.remove_from_starred(repo)
-                    starred_back.pop()
-                    changed = True
-                except Exception as err:
-                    print(f"[autostarback] ERROR: Failed to unstar {repo_name} for {user}: {err}")
                     break
 
             print(f"[autostarback] Final: {user}: user_starred_yours={needed}, you_starred_theirs={len(starred_back)}")

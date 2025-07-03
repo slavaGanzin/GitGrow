@@ -5,8 +5,6 @@ import sys
 import json
 from pathlib import Path
 from github import Github
-from dotenv import load_dotenv
-load_dotenv()
 
 BOT_USER = os.getenv("BOT_USER")
 TOKEN = os.getenv("PAT_TOKEN")

@@ -21,15 +21,15 @@ def main():
     print("Authenticating with GitHub...")
     gh = Github(TOKEN)
     try:
-        user = gh.get_user(BOT_USER)
-        print(f"Authenticated as: {user.login}")
+        me = gh.get_user(BOT_USER)
+        print(f"Authenticated as: {me.login}")
     except Exception as e:
         print("ERROR: Could not authenticate with GitHub:", e)
         sys.exit(1)
 
     print("Collecting all public, non-fork repos owned by BOT_USER...")
     try:
-        repos = [r for r in user.get_repos(type="owner") if not r.fork and not r.private]
+        repos = [r for r in me.get_repos(type="owner") if not r.fork and not r.private]
         print(f"Found {len(repos)} repos.")
     except Exception as e:
         print("ERROR: Failed to list repos:", e)
@@ -39,6 +39,7 @@ def main():
     stargazer_set = set()
     reciprocity = {}
 
+    # For each repo, collect stargazers and map which of your repos they starred
     for idx, repo in enumerate(repos):
         print(f"[{idx+1}/{len(repos)}] Processing repo: {repo.full_name}")
         try:
@@ -59,6 +60,27 @@ def main():
     current_stargazers = sorted(stargazer_set)
     print(f"Total unique stargazers across all repos: {len(current_stargazers)}")
 
+    # Reconcile "starred_back" for each stargazer
+    for idx, user in enumerate(current_stargazers, 1):
+        print(f"[reconcile] [{idx}/{len(current_stargazers)}] Checking stars given by {BOT_USER} to {user}")
+        try:
+            u = gh.get_user(user)
+            user_repos = [r for r in u.get_repos() if not r.fork and not r.private][:5]
+            starred_back = []
+            for repo in user_repos:
+                # Check if bot user has starred this repo
+                try:
+                    is_starred = repo.has_in_starred(me)
+                except Exception:
+                    # Fallback: check manually (API inefficient but rare)
+                    is_starred = any(sg.login == BOT_USER for sg in repo.get_stargazers())
+                if is_starred:
+                    starred_back.append(repo.full_name)
+            reciprocity[user]["starred_back"] = starred_back
+            print(f"    You have starred {len(starred_back)}/{len(user_repos)} of {user}'s repos.")
+        except Exception as e:
+            print(f"    ERROR checking starred_back for {user}: {e}")
+
     # Load previous state if exists (keep mutual_stars for legacy)
     if STATE_PATH.exists():
         print(f"Loading previous state from {STATE_PATH} ...")
@@ -66,11 +88,6 @@ def main():
             state = json.load(f)
         previous_stargazers = set(state.get("current_stargazers", []))
         mutual_stars = state.get("mutual_stars", {})
-        # Optionally, try to keep old starred_back for each user
-        if "reciprocity" in state:
-            for user, info in state["reciprocity"].items():
-                if user in reciprocity:
-                    reciprocity[user]["starred_back"] = info.get("starred_back", [])
         print(f"Previous stargazers: {len(previous_stargazers)}, mutual_stars: {len(mutual_stars)}")
     else:
         print("No previous state found.")

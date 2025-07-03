@@ -43,9 +43,7 @@ def main():
         state = json.load(f)
 
     current_stargazers = set(state.get("current_stargazers", []))
-    print(f"[autostarback] current_stargazers: {len(current_stargazers)} loaded")
-    mutual_stars = state.get("mutual_stars", {})
-    print(f"[autostarback] mutual_stars: {len(mutual_stars)} loaded")
+    reciprocity = state.get("reciprocity", {})
     now = datetime.now(timezone.utc).isoformat()
 
     print("[autostarback] Authenticating with GitHub ...")
@@ -53,75 +51,52 @@ def main():
     me = gh.get_user(BOT_USER)
     print(f"[autostarback] Authenticated as: {me.login}")
 
-    print("[autostarback] Fetching your repos ...")
-    my_repos = {repo.full_name for repo in me.get_repos()}
-    print(f"[autostarback] You own {len(my_repos)} repos.")
-
-    print("[autostarback] Starting star-back loop over all current stargazers ...")
+    print("[autostarback] Starting star-back reconciliation loop over all current stargazers ...")
     for user_idx, user in enumerate(current_stargazers, 1):
+        if user not in reciprocity:
+            continue
+        starred_by = reciprocity[user]["starred_by"]
+        starred_back = reciprocity[user]["starred_back"]
         print(f"\n[autostarback] Processing user [{user_idx}/{len(current_stargazers)}]: {user}")
+        print(f"    starred_by={len(starred_by)} starred_back={len(starred_back)}")
         try:
             u = gh.get_user(user)
-            print(f"[autostarback] Got user object for {user}")
-
-            # How many of my repos has this user starred?
-            user_star_count = 0
-            for repo_idx, repo in enumerate(my_repos, 1):
-                print(f"    [repo-check] ({repo_idx}/{len(my_repos)}) Checking {repo} ...")
-                repo_obj = gh.get_repo(repo)
-                for sg in repo_obj.get_stargazers():
-                    if sg.login == user:
-                        user_star_count += 1
-                        print(f"      [repo-check] {user} has starred {repo}")
-                        break
-            print(f"[autostarback] {user} has starred {user_star_count} of your repos.")
-
-            # How many of their repos have you starred?
-            your_stars = mutual_stars.get(user, [])
-            if your_stars and isinstance(your_stars[0], dict):
-                your_stars = [d['repo'] for d in your_stars]
-            your_star_count = len(your_stars)
-            print(f"[autostarback] You have starred {your_star_count} of {user}'s repos.")
-
-            # Get candidate repos to star for this user (first 5 for efficiency)
-            print(f"[autostarback] Fetching {user}'s repos ...")
+            # Candidate repos to (star/unstar), always work on first 5 (as in autotrack)
             user_repos = [r for r in u.get_repos() if not r.fork and not r.private][:5]
-            print(f"[autostarback] {user} has {len(user_repos)} candidate repos for reciprocity.")
+            # For easy lookup
+            user_repo_names = [r.full_name for r in user_repos]
 
-            # Star/unstar as needed to match counts
-            while your_star_count < user_star_count and len(user_repos) > your_star_count:
-                repo = user_repos[your_star_count]
+            # Star more of their repos if needed
+            while len(starred_back) < len(starred_by) and len(user_repos) > len(starred_back):
+                repo = user_repos[len(starred_back)]
                 print(f"[autostarback] Starring {repo.full_name} for {user} (to match count)")
                 try:
                     me.add_to_starred(repo)
-                    mutual_stars.setdefault(user, [])
-                    mutual_stars[user].append({
-                        "repo": repo.full_name,
-                        "starred_at": now
-                    })
-                    your_star_count += 1
+                    starred_back.append(repo.full_name)
                 except Exception as err:
                     print(f"[autostarback] ERROR: Failed to star {repo.full_name} for {user}: {err}")
 
-            while your_star_count > user_star_count and your_star_count > 0:
-                repo_name = your_stars[-1]
+            # Unstar extra repos if needed
+            while len(starred_back) > len(starred_by):
+                repo_name = starred_back[-1]
                 print(f"[autostarback] Unstarring {repo_name} for {user} (to match count)")
                 try:
                     repo = gh.get_repo(repo_name)
                     me.remove_from_starred(repo)
-                    mutual_stars[user].pop()
-                    your_star_count -= 1
+                    starred_back.pop()
                 except Exception as err:
                     print(f"[autostarback] ERROR: Failed to unstar {repo_name} for {user}: {err}")
 
-            print(f"[autostarback] Final: {user}: user_starred_yours={user_star_count}, you_starred_theirs={your_star_count}")
+            print(f"[autostarback] Final: {user}: user_starred_yours={len(starred_by)}, you_starred_theirs={len(starred_back)}")
+
+            # Save changes to state (they will be refreshed on next autotrack anyway)
+            reciprocity[user]["starred_back"] = starred_back
 
         except Exception as e:
             print(f"[autostarback] ERROR processing {user}: {e}")
 
-    # Update state
-    print("[autostarback] Writing updated mutual_stars to state file ...")
-    state["mutual_stars"] = mutual_stars
+    # Write updated state (reciprocity only; autotrack will always overwrite on next run)
+    state["reciprocity"] = reciprocity
     with open(STATE_PATH, "w") as f:
         json.dump(state, f, indent=2)
     print("[autostarback] State updated and saved to disk.")

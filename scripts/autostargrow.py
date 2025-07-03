@@ -44,7 +44,25 @@ def main():
         growth_starred = state.get("growth_starred", {})
     else:
         print("No existing stargazer state found; starting fresh.")
+        state = {}
         growth_starred = {}
+
+    # Upgrade legacy entries to always use dict with 'repo' and 'starred_at'
+    changed = False
+    for user, entries in list(growth_starred.items()):
+        upgraded = []
+        for e in entries:
+            if isinstance(e, dict) and "repo" in e and "starred_at" in e:
+                upgraded.append(e)
+            elif isinstance(e, str):
+                upgraded.append({"repo": e, "starred_at": None})
+                changed = True
+            else:
+                # Any other legacy or corrupt entry
+                continue
+        if upgraded != entries:
+            growth_starred[user] = upgraded
+            changed = True
 
     # Load candidate usernames for growth
     with open(USERNAMES_PATH) as f:
@@ -79,17 +97,13 @@ def main():
                 "repo": repo.full_name,
                 "starred_at": now_iso
             })
+            changed = True
             print(f"    Growth: Starred {repo.full_name} for {user} at {now_iso}")
         except Exception as e:
             print(f"    Failed to star for growth {user}: {e}")
 
     # Save updated growth_starred to state file
     print(f"Saving updated growth_starred to {STATE_PATH} ...")
-    if STATE_PATH.exists():
-        with open(STATE_PATH) as f:
-            state = json.load(f)
-    else:
-        state = {}
     state["growth_starred"] = growth_starred
     with open(STATE_PATH, "w") as f:
         json.dump(state, f, indent=2)

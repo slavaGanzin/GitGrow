@@ -5,6 +5,8 @@ import sys
 import json
 from pathlib import Path
 from github import Github
+from dotenv import load_dotenv
+load_dotenv()
 
 BOT_USER = os.getenv("BOT_USER")
 TOKEN = os.getenv("PAT_TOKEN")
@@ -35,11 +37,10 @@ def main():
         print("ERROR: Failed to list repos:", e)
         sys.exit(1)
 
-    # Gather stargazers and prepare reciprocity mapping
+    # Build set of all unique stargazers and their starred repos
     stargazer_set = set()
     reciprocity = {}
 
-    # For each repo, collect stargazers and map which of your repos they starred
     for idx, repo in enumerate(repos):
         print(f"[{idx+1}/{len(repos)}] Processing repo: {repo.full_name}")
         try:
@@ -60,26 +61,20 @@ def main():
     current_stargazers = sorted(stargazer_set)
     print(f"Total unique stargazers across all repos: {len(current_stargazers)}")
 
-    # Reconcile "starred_back" for each stargazer
-    for idx, user in enumerate(current_stargazers, 1):
-        print(f"[reconcile] [{idx}/{len(current_stargazers)}] Checking stars given by {BOT_USER} to {user}")
-        try:
-            u = gh.get_user(user)
-            user_repos = [r for r in u.get_repos() if not r.fork and not r.private][:5]
-            starred_back = []
-            for repo in user_repos:
-                # Check if bot user has starred this repo
-                try:
-                    is_starred = repo.has_in_starred(me)
-                except Exception:
-                    # Fallback: check manually (API inefficient but rare)
-                    is_starred = any(sg.login == BOT_USER for sg in repo.get_stargazers())
-                if is_starred:
-                    starred_back.append(repo.full_name)
-            reciprocity[user]["starred_back"] = starred_back
-            print(f"    You have starred {len(starred_back)}/{len(user_repos)} of {user}'s repos.")
-        except Exception as e:
-            print(f"    ERROR checking starred_back for {user}: {e}")
+    # Fetch all repos YOU have starred
+    print("Fetching all repos starred by the bot user...")
+    try:
+        starred_repos = list(me.get_starred())
+        print(f"Bot user has starred {len(starred_repos)} repos in total.")
+    except Exception as e:
+        print(f"ERROR fetching bot user's starred repos: {e}")
+        starred_repos = []
+
+    # For each of your starred repos, if owner is a stargazer, log as "starred_back"
+    for repo in starred_repos:
+        owner = repo.owner.login
+        if owner in reciprocity:
+            reciprocity[owner]["starred_back"].append(repo.full_name)
 
     # Load previous state if exists (keep mutual_stars for legacy)
     if STATE_PATH.exists():

@@ -1,13 +1,12 @@
 # .github/workflows/run_autostargrow.yml
 name: GitGrow StarGrow (Scheduled)
 # This workflow is used to run the GitGrowBot autostargrow bot on a schedule.
-# It is triggered four times per day (00:20, 06:20, 12:20, 18:20 UTC), and can also be run manually.
+# It is triggered four times per day and can also be run manually.
 # It performs growth starring from config/usernames.txt, with results committed to the tracker-data branch and exported as an artifact.
-# If .github/state/stargazer_state.json is missing, autotrack.py is called as a precaution to ensure all logic can proceed.
 
 on:
   schedule:
-    - cron: '20 0,6,12,18 * * *'  # Fine for most users; adjust as needed if you expect high volume of growth actions.
+    - cron: '20 0,8,16,24 * * *' # Four times daily, at 00:20, 08:20, 16:20, and 24:20 UTC
   workflow_dispatch:
 
 jobs:
@@ -38,7 +37,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run autostargrow.py (first trigger will also run autotrack.py if needed)
+      - name: Run autostargrow.py (stars new users from config/usernames.txt)
         run: python3 scripts/autostargrow.py
         env:
           PAT_TOKEN: ${{ secrets.PAT_TOKEN }}

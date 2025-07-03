@@ -1,17 +1,15 @@
-# .github/workflows/run_autounstarback.yml
-name: GitGrow UnstarBack (Scheduled)
-# This workflow runs your autounstarback bot on a schedule.
-# It is triggered four times per day and can also be run manually.
-# It checks for users who have not reciprocated stars after 4 days and unstars them accordingly.
-# The results are committed to the tracker-data branch and uploaded as an artifact.
+# .github/workflows/run_autotrack.yml
+name: GitGrow TrackStargazers (Scheduled)
+# This workflow runs autotrack.py to refresh and reconcile the full state of all stargazers and mutual stars.
+# It is triggered twice per day and can also be run manually.
 
 on:
   schedule:
-    - cron: '20 4,12,20,28 * * *'
+    - cron: '10 1,13 * * *' # At 01:10 and 13:10 UTC every day
   workflow_dispatch:
 
 jobs:
-  autounstarback:
+  autotrack:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -38,16 +36,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run autounstarback.py (unstar users who did not reciprocate after 4 days)
-        run: python3 scripts/autounstarback.py
+      - name: Run autotrack.py (reconciles full stargazer/reciprocity state)
+        run: python3 scripts/autotrack.py
         env:
           PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
           BOT_USER: ${{ vars.BOT_USER }}
 
-      - name: Commit and push stargazer state to tracker-data
+      - name: Commit and push updated stargazer state to tracker-data
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: clean up unreciprocated growth stars [bot]"
+          commit_message: "chore: update stargazer/reciprocity state [bot]"
           branch: tracker-data
           file_pattern: .github/state/stargazer_state.json
 

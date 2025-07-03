@@ -3,7 +3,6 @@
 import os
 import sys
 import json
-import subprocess
 from pathlib import Path
 from github import Github
 from datetime import datetime, timezone
@@ -16,20 +15,7 @@ def main():
     print("==== [START] autostarback.py ====")
     print(f"ENV: TOKEN={'SET' if TOKEN else 'UNSET'} BOT_USER={BOT_USER}")
 
-    # Always refresh state file before proceeding
-    try:
-        print("[autostarback] Launching autotrack.py to refresh state ...")
-        res = subprocess.run(
-            [sys.executable, "scripts/autotrack.py"],
-            check=True,
-            env={**os.environ, "PAT_TOKEN": TOKEN, "BOT_USER": BOT_USER or ""}
-        )
-        print(f"[autostarback] autotrack.py finished with return code: {res.returncode}")
-    except Exception as e:
-        print(f"[autostarback] ERROR: Failed to run autotrack.py: {e}", file=sys.stderr)
-        sys.exit(1)
-
-    print("[autostarback] Checking critical environment variables ...")
+    # Only check for required environment and state file
     if not TOKEN or not BOT_USER:
         print("[autostarback] ERROR: PAT_TOKEN and BOT_USER required.", file=sys.stderr)
         sys.exit(1)

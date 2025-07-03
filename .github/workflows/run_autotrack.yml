@@ -1,11 +1,7 @@
-# .github/workflows/run_autotrack.yml
 name: GitGrow TrackStars (Scheduled)
-# Runs autotrack.py to reconcile stargazers/mutual stars.
-# Triggers twice per day, or manually.
-
 on:
   schedule:
-    - cron: '10 1,13 * * *'  # 01:10 and 13:10 UTC
+    - cron: '10 1,13 * * *'
   workflow_dispatch:
 
 jobs:
@@ -15,23 +11,16 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout main (code/scripts)
+      - name: Checkout code (main branch)
         uses: actions/checkout@v4
         with:
           ref: main
-          # fetch-depth: 0  # Uncomment if you need full git history
 
       - name: Fetch stargazer state from tracker-data branch
         run: |
           git fetch origin tracker-data:tracker-data
           mkdir -p .github/state/
           git checkout tracker-data -- .github/state/stargazer_state.json || true
-
-      - name: Debug: List directory contents
-        run: |
-          ls -l
-          ls -l scripts
-          ls -l .github/state
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -61,3 +50,4 @@ jobs:
         with:
           name: stargazer-state
           path: .github/state/stargazer_state.json
+

@@ -36,16 +36,16 @@ def main():
         print("ERROR: Could not authenticate with GitHub:", e)
         sys.exit(1)
 
-    # Load previous growth_starred users from state file if available
-    if STATE_PATH.exists():
-        print(f"Loading state from {STATE_PATH} ...")
-        with open(STATE_PATH) as f:
-            state = json.load(f)
-        growth_starred = state.get("growth_starred", {})
-    else:
-        print("No existing stargazer state found; starting fresh.")
-        state = {}
-        growth_starred = {}
+    # *** ONLY THIS BLOCK IS MODIFIED ***
+    if not STATE_PATH.exists():
+        print(f"ERROR: State file {STATE_PATH} not found. Did you forget to fetch tracker-data branch?", file=sys.stderr)
+        sys.exit(1)
+
+    print(f"Loading state from {STATE_PATH} ...")
+    with open(STATE_PATH) as f:
+        state = json.load(f)
+    growth_starred = state.get("growth_starred", {})
+    # *** END OF MODIFICATION ***
 
     # Upgrade legacy entries to always use dict with 'repo' and 'starred_at'
     changed = False

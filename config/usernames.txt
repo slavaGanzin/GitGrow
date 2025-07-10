@@ -30,7 +30,6 @@ develectro
 emaraschio
 asif256000
 mikemaz-dev
-mrtnrocks
 pomponchik
 ayoubgm
 dmkjfs
@@ -96070,6 +96069,3 @@ Heisenberg
 nibin
 abhishekmunie
 ARR4N
-zaenal1234
-all4innov
-simm

@@ -12634,7 +12634,6 @@ baptiste0928
 matthewmturner
 maulvialf
 ajaycharan
-m0lentum
 Lankeyk
 cainky
 1834924958
@@ -31010,7 +31009,6 @@ RMHogervorst
 ObserverZero
 shyamalschandra
 Microsheep
-Zeta611
 ASoleimaniB
 sami-galal
 alekseitylindus

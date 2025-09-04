@@ -4,10 +4,10 @@ name: GitGrow StarGrow (Scheduled)
 # It is triggered four times per day and can also be run manually.
 # It performs growth starring from config/usernames.txt, with results committed to the tracker-data branch and exported as an artifact.
 
-on:
-  schedule:
-    - cron: '20 0,8,16,23 * * *' # Four times daily, at 00:20, 08:20, 16:20, and 24:20 UTC
-  workflow_dispatch:
+#on:
+#  schedule:
+#    - cron: '20 0,8,16,23 * * *' # Four times daily, at 00:20, 08:20, 16:20, and 24:20 UTC
+#  workflow_dispatch:
 
 jobs:
   autostargrow:

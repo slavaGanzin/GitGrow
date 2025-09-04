@@ -5,10 +5,10 @@ name: GitGrow StarBack (Scheduled)
 # It checks for new stars on repositories and stars back users who have reciprocated within 4 days or who are stargazers.
 # The results are committed to the tracker-data branch and uploaded as an artifact.
 
-on:
-  schedule:
-    - cron: '20 1,9,17,21 * * *'  # Fine for most users. If you expect >100 new stargazers per day, increase run frequency or set a stricter per-run limit to avoid GitHub API rate limit stalls.
-  workflow_dispatch:
+#on:
+#  schedule:
+#    - cron: '20 1,9,17,21 * * *'  # Fine for most users. If you expect >100 new stargazers per day, increase run frequency or set a stricter per-run limit to avoid GitHub API rate limit stalls.
+#  workflow_dispatch:
 
 jobs:
   autostarback:

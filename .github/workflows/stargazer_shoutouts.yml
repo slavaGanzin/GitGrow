@@ -7,11 +7,11 @@ name: GitGrow Shoutouts (Manual)
 # and commits the updated state back to the tracker-data branch.
 # The shoutouts include welcome and farewell comments for stargazers.
 
-on:
-  # This workflow is triggered manually and can also be run on a schedule.
-  schedule:
-    - cron: '55 11 * * *' # Runs daily at 11:55 UTC
-  workflow_dispatch:
+# on:
+#   # This workflow is triggered manually and can also be run on a schedule.
+#   schedule:
+#     - cron: '55 11 * * *' # Runs daily at 11:55 UTC
+#   workflow_dispatch:
 
 jobs:
   stargazer_shoutouts:

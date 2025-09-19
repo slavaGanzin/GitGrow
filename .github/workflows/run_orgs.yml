@@ -8,10 +8,10 @@ name: DEPRECATED Org Targeter [WILL BE DELETED SOON]
 # - No significant increase in engagement or followers
 # - Wasted GitHub Actions minutes
 
-on:
+#on:
   # schedule:
     # - cron: '*/15 * * * *'    # every 15 minutes (UTC)
-  workflow_dispatch:          # allow manual trigger
+#  workflow_dispatch:          # allow manual trigger
 
 jobs:
   run-orgs:

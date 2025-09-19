@@ -5,10 +5,10 @@ name: GitGrow Follow (Scheduled)
 # The follow bot processes a random number of new follows (5–155) each run.
 # The unfollow bot runs separately on its own schedule.
 
-on:
-  schedule:
-    - cron: '5 */1 * * *'     # every hour at minute 5 (UTC)
-  workflow_dispatch: {}      # allows manual triggering
+# on:
+#   schedule:
+#     - cron: '5 */1 * * *'     # every hour at minute 5 (UTC)
+#   workflow_dispatch: {}      # allows manual triggering
 
 jobs:
   follow:

@@ -4,11 +4,11 @@ name: GitGrow UnstarBack (Scheduled)
 # It is triggered four times per day and can also be run manually.
 # It checks for users who have not reciprocated stars after 4 days and unstars them accordingly.
 # The results are committed to the tracker-data branch and uploaded as an artifact.
-
-on:
-  schedule:
-    - cron: '20 3,11,19,5 * * *' # Fine for most users. If you expect >100 new stargazers per day, increase run frequency or set a stricter per-run limit to avoid stalls.
-  workflow_dispatch:
+#
+# on:
+#   schedule:
+#     - cron: '20 3,11,19,5 * * *' # Fine for most users. If you expect >100 new stargazers per day, increase run frequency or set a stricter per-run limit to avoid stalls.
+#   workflow_dispatch:
 
 jobs:
   autounstarback:
